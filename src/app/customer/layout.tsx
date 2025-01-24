@@ -1,3 +1,5 @@
+import { CartProvider } from '../CartProvider';
+
 export default function CustomerLayout({
   children,
 }: {
@@ -5,8 +7,9 @@ export default function CustomerLayout({
 }) {
   return (
     <>
-      <h1>Customer</h1>
-      <main>{children}</main>
+      <CartProvider>
+        <main>{children}</main>
+      </CartProvider>
     </>
   );
 }
