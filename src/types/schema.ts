@@ -31,7 +31,7 @@ export interface Order {
   id: UUID;
   tableId: number;
   totalPrice: number;
-  status: 'pending' | 'completed' | 'canceled';
+  status: 'pending' | 'preparing' | 'completed';
   createdAt: string;
 }
 

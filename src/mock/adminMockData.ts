@@ -55,43 +55,83 @@ export const menuItems: MenuItem[] = [
 
 export const orders: Order[] = [
   {
-    id: 'g7h8i9j0-k1l2-3m4n-5o6p-a1b2c3d4e5f6',
-    tableId: 1,
-    totalPrice: 18.98,
+    id: 'o1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6',
+    tableId: 3,
+    totalPrice: 19.97,
     status: 'pending',
     createdAt: '2025-01-25T14:30:00Z',
   },
   {
-    id: 'h8i9j0k1-l2m3-4n5o-6p7a-b2c3d4e5f6g7',
-    tableId: 2,
-    totalPrice: 10.99,
-    status: 'completed',
-    createdAt: '2025-01-25T15:00:00Z',
+    id: 'o2b3c4d5-f6g7-8h9i-0j1k-l2m3n4o5p6a1',
+    tableId: 1,
+    totalPrice: 15.98,
+    status: 'pending',
+    createdAt: '2025-01-25T14:35:00Z',
+  },
+  {
+    id: 'o3c4d5e6-g7h8-9i0j-1k2l-m3n4o5p6a1b2',
+    tableId: 5,
+    totalPrice: 25.98,
+    status: 'pending',
+    createdAt: '2025-01-25T14:40:00Z',
   },
 ];
 
 export const orderItems: OrderItem[] = [
+  // Order 1
   {
-    id: 'i9j0k1l2-m3n4-5o6p-7a8b-c3d4e5f6g7h8',
-    orderId: 'g7h8i9j0-k1l2-3m4n-5o6p-a1b2c3d4e5f6',
+    id: 'oi1a2b3c4',
+    orderId: 'o1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6',
     menuItemId: 'd4e5f6g7-h8i9-0j1k-2l3m-n4o5p6a1b2c3',
     quantity: 2,
+    price: 15.98,
+  },
+  {
+    id: 'oi2b3c4d5',
+    orderId: 'o1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6',
+    menuItemId: 'f6g7h8i9-j0k1-2l3m-4n5o-p6a1b2c3d4e5',
+    quantity: 1,
+    price: 3.99,
+  },
+
+  // Order 2
+  {
+    id: 'oi3c4d5e6',
+    orderId: 'o2b3c4d5-f6g7-8h9i-0j1k-l2m3n4o5p6a1',
+    menuItemId: 'd4e5f6g7-h8i9-0j1k-2l3m-n4o5p6a1b2c3',
+    quantity: 1,
     price: 7.99,
   },
   {
-    id: 'j0k1l2m3-n4o5-6p7a-8b9c-d4e5f6g7h8i9',
-    orderId: 'h8i9j0k1-l2m3-4n5o-6p7a-b2c3d4e5f6g7',
+    id: 'oi4d5e6f7',
+    orderId: 'o2b3c4d5-f6g7-8h9i-0j1k-l2m3n4o5p6a1',
     menuItemId: 'e5f6g7h8-i9j0-1k2l-3m4n-o5p6a1b2c3d4',
     quantity: 1,
     price: 10.99,
+  },
+
+  // Order 3
+  {
+    id: 'oi5e6f7g8',
+    orderId: 'o3c4d5e6-g7h8-9i0j-1k2l-m3n4o5p6a1b2',
+    menuItemId: 'e5f6g7h8-i9j0-1k2l-3m4n-o5p6a1b2c3d4',
+    quantity: 2,
+    price: 21.98,
+  },
+  {
+    id: 'oi6f7g8h9',
+    orderId: 'o3c4d5e6-g7h8-9i0j-1k2l-m3n4o5p6a1b2',
+    menuItemId: 'f6g7h8i9-j0k1-2l3m-4n5o-p6a1b2c3d4e5',
+    quantity: 2,
+    price: 5.98,
   },
 ];
 
 export const payments: Payment[] = [
   {
-    id: 'k1l2m3n4-o5p6-7a8b-9c0d-e5f6g7h8i9j0',
-    orderId: 'h8i9j0k1-l2m3-4n5o-6p7a-b2c3d4e5f6g7',
-    amount: 10.99,
+    id: 'p1g2h3i4',
+    orderId: 'o3c4d5e6-g7h8-9i0j-1k2l-m3n4o5p6a1b2',
+    amount: 25.98,
     paymentMethod: 'card',
     status: 'success',
   },
