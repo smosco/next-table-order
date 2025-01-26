@@ -8,6 +8,7 @@ import {
   Home,
   ClipboardList,
   CreditCard,
+  ChartColumnIncreasing,
   UtensilsCrossed,
   Settings,
 } from 'lucide-react';
@@ -27,6 +28,11 @@ const sidebarNavItems = [
     title: 'Payment',
     href: '/admin/payment',
     icon: CreditCard,
+  },
+  {
+    title: 'Analytics',
+    href: '/admin/analytics',
+    icon: ChartColumnIncreasing,
   },
   {
     title: 'Menu',
