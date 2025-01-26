@@ -1,3 +1,5 @@
+import { Sidebar } from '@/components/admin/Sidebar';
+
 export default function AdminLayout({
   children,
 }: {
@@ -5,8 +7,10 @@ export default function AdminLayout({
 }) {
   return (
     <>
-      <h1>Admin</h1>
-      <main>{children}</main>
+      <div className='flex h-screen overflow-hidden'>
+        <Sidebar />
+        <main className='flex-1 overflow-y-auto bg-background'>{children}</main>
+      </div>
     </>
   );
 }

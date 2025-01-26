@@ -1,7 +1,5 @@
-import React from 'react';
+import RealTimeOrders from '@/components/admin/RealTimeOrders';
 
-function OrdersPage() {
-  return <div>OrdersPage</div>;
+export default function OrdersPage() {
+  return <RealTimeOrders />;
 }
-
-export default OrdersPage;
