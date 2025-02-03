@@ -1,59 +1,35 @@
 'use client';
 
-import * as React from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 type Category = {
-  id: number;
+  id: string;
   name: string;
-  icon?: string;
-  subCategories?: { id: number; name: string }[];
 };
 
-const categories: Category[] = [
-  {
-    id: 1,
-    name: 'Sandwiches',
-    subCategories: [
-      { id: 11, name: 'Originals' },
-      { id: 12, name: 'Favorites' },
-      { id: 13, name: 'Giant Clubs' },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Sides',
-    subCategories: [
-      { id: 21, name: 'Chips' },
-      { id: 22, name: 'Pickles' },
-      { id: 23, name: 'Cookies' },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Drinks',
-    subCategories: [
-      { id: 31, name: 'Sodas' },
-      { id: 32, name: 'Bottled Water' },
-      { id: 33, name: 'Juices' },
-    ],
-  },
-];
+export function CategorySidebar() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const pathname = usePathname();
+  const activeCategoryId = pathname.split('/').pop(); // ✅ 현재 URL에서 ID 가져오기
 
-export function CategorySidebar({
-  onCategorySelect,
-}: {
-  onCategorySelect: (id: number) => void;
-}) {
-  const [activeCategory, setActiveCategory] = React.useState<number | null>(
-    null
-  );
+  // Supabase에서 카테고리 목록 가져오기
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await fetch('/api/public/categories'); // ✅ 카테고리 목록 API 호출
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    }
 
-  const handleCategoryClick = (id: number) => {
-    setActiveCategory(id);
-    onCategorySelect(id);
-  };
+    fetchCategories();
+  }, []);
 
   return (
     <div className='w-64 border-r bg-card'>
@@ -61,22 +37,38 @@ export function CategorySidebar({
         <h2 className='font-semibold'>Menu Category</h2>
       </div>
       <nav className='p-2'>
-        {categories.map((category) => (
+        {/* 전체 메뉴 보기 (카테고리 없음) */}
+        <Link href='/customer/menu' passHref>
           <Button
-            key={category.id}
             variant='ghost'
             className={cn(
               'w-full justify-start font-normal',
-              activeCategory === category.id && 'bg-accent'
+              activeCategoryId === 'menu' && 'bg-accent' // 현재 `/customer/menu`이면 활성화
             )}
-            onClick={() => handleCategoryClick(category.id)}
           >
-            {category.name}
+            All Categories
           </Button>
+        </Link>
+
+        {/* ID 기반으로 카테고리 링크 이동 */}
+        {categories.map((category) => (
+          <Link
+            key={category.id}
+            href={`/customer/menu/${category.id}`} // ID를 기반으로 링크 생성
+            passHref
+          >
+            <Button
+              variant='ghost'
+              className={cn(
+                'w-full justify-start font-normal',
+                activeCategoryId === category.id && 'bg-accent' // URL ID와 현재 ID 비교하여 활성화
+              )}
+            >
+              {category.name}
+            </Button>
+          </Link>
         ))}
       </nav>
     </div>
   );
 }
-
-export { categories };
