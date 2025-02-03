@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Minus, Plus, Trash2 } from 'lucide-react';
+import { PaymentButton } from './PaymentButton';
 
 export function CartDrawer() {
   const {
@@ -31,7 +32,7 @@ export function CartDrawer() {
               <div className='space-y-4'>
                 {items.map((item) => (
                   <div
-                    key={item.id}
+                    key={item.menuId}
                     className='flex items-center justify-between gap-4 border-b pb-4'
                   >
                     <div className='flex-1'>
@@ -48,7 +49,7 @@ export function CartDrawer() {
                         className='h-8 w-8'
                         onClick={() =>
                           updateQuantity(
-                            item.id,
+                            item.menuId,
                             Math.max(1, item.quantity - 1)
                           )
                         }
@@ -61,7 +62,7 @@ export function CartDrawer() {
                         size='icon'
                         className='h-8 w-8'
                         onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
+                          updateQuantity(item.menuId, item.quantity + 1)
                         }
                       >
                         <Plus className='h-4 w-4' />
@@ -70,7 +71,7 @@ export function CartDrawer() {
                         variant='ghost'
                         size='icon'
                         className='h-8 w-8'
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item.menuId)}
                       >
                         <Trash2 className='h-4 w-4' />
                       </Button>
@@ -86,9 +87,7 @@ export function CartDrawer() {
               <span className='font-semibold'>Total Price</span>
               <span className='font-semibold'>{total.toLocaleString()} ₩</span>
             </div>
-            <Button className='w-full' size='lg' disabled={items.length === 0}>
-              Checkout
-            </Button>
+            <PaymentButton tableId={1} cartItems={items} />
           </div>
         </div>
       </SheetContent>

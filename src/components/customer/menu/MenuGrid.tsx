@@ -27,7 +27,6 @@ export function MenuGrid() {
   const { categoryId } = useParams(); // URL에서 categoryId 가져오기
   const [menuItems, setMenus] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
@@ -36,7 +35,6 @@ export function MenuGrid() {
     async function fetchMenus() {
       setLoading(true);
       try {
-        // `categoryId` 그대로 API 요청
         const categoryParam = categoryId ? `?categoryId=${categoryId}` : '';
         const response = await fetch(`/api/public/menus${categoryParam}`);
         const data = await response.json();
@@ -54,11 +52,14 @@ export function MenuGrid() {
   const handleAddToCart = () => {
     if (selectedItem) {
       addItem({
-        id: selectedItem.id,
+        menuId: selectedItem.id,
         name: selectedItem.name,
         price: selectedItem.price,
         quantity,
+        optionSelections: [], // 나중에 옵션 추가 가능하도록 빈 배열로 설정
       });
+
+      // 초기화
       setSelectedItem(null);
       setQuantity(1);
     }
