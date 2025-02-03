@@ -7,7 +7,7 @@ export default function Home() {
       <h1>Next Table Order</h1>
       <div className='flex items-center gap-4'>
         <Button>
-          <Link href='/customer'>Customer</Link>
+          <Link href='/customer/menu'>Customer</Link>
         </Button>
         <Button>
           <Link href='/admin'>Admin</Link>
