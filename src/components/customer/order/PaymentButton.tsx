@@ -1,69 +1,39 @@
-'use client';
-
 import { useState } from 'react';
-import { usePayment } from '@/hooks/usePayment';
-import { Button } from '@/components/ui/button';
 
-export function PaymentButton({
-  tableId,
-  cartItems,
-}: {
-  tableId: number;
-  cartItems: any[];
-}) {
-  const { processPayment, loading, error } = usePayment();
-  const [paymentMethod, setPaymentMethod] = useState('card');
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+export function PaymentButton({ orderId }: { orderId: string }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handlePayment = async () => {
-    if (cartItems.length === 0) return alert('Cart is empty.');
+    if (!orderId) return alert('Order not found.');
 
-    const totalPrice = cartItems.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0
-    );
+    setLoading(true);
+    setError(null);
 
-    const data = await processPayment({
-      tableId,
-      items: cartItems.map((item) => ({
-        menuId: item.id,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-      totalPrice,
-      paymentMethod,
-    });
+    try {
+      const response = await fetch('/api/payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, paymentMethod: 'card' }),
+      });
 
-    if (data) {
-      setSuccessMessage(`Order successful! Order ID: ${data.orderId}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+
+      setSuccess(true);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div>
-      <div className='flex gap-2'>
-        <Button
-          variant={paymentMethod === 'card' ? 'default' : 'outline'}
-          onClick={() => setPaymentMethod('card')}
-        >
-          Card
-        </Button>
-        <Button
-          variant={paymentMethod === 'cash' ? 'default' : 'outline'}
-          onClick={() => setPaymentMethod('cash')}
-        >
-          Cash
-        </Button>
-      </div>
-
-      <Button
-        onClick={handlePayment}
-        disabled={loading}
-        className='mt-4 w-full'
-      >
-        {loading ? 'Processing...' : 'Pay & Order'}
-      </Button>
-      {successMessage && <p className='text-green-500'>{successMessage}</p>}
+      <button onClick={handlePayment} disabled={loading || success}>
+        {loading ? 'Processing...' : success ? 'Payment Completed' : 'Pay Now'}
+      </button>
       {error && <p className='text-red-500'>{error}</p>}
     </div>
   );
