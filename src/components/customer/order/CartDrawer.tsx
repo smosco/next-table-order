@@ -24,40 +24,40 @@ export function CartDrawer() {
 
   const handleOrderSuccess = (orderId: string) => {
     setOrderId(orderId);
-    setIsPaymentOpen(true); // 주문 완료 후 결제 모달 열기
+    setIsPaymentOpen(true);
   };
 
   return (
     <>
       <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-        <SheetContent side='right' className='w-[400px] sm:max-w-[540px]'>
+        <SheetContent side='right' className='w-full sm:max-w-[540px] p-6'>
           <div className='flex flex-col h-full'>
-            <h2 className='font-semibold text-lg mb-4'>Your Cart</h2>
+            <h2 className='font-semibold text-2xl mb-6'>Your Cart</h2>
 
             <ScrollArea className='flex-1 -mx-6 px-6'>
               {items.length === 0 ? (
-                <p className='text-center text-muted-foreground'>
+                <p className='text-center text-muted-foreground text-lg'>
                   Your cart is empty
                 </p>
               ) : (
-                <div className='space-y-4'>
+                <div className='space-y-6'>
                   {items.map((item) => (
                     <div
                       key={item.menuId}
-                      className='flex items-center justify-between gap-4 border-b pb-4'
+                      className='flex items-center justify-between gap-4 border-b pb-6'
                     >
                       <div className='flex-1'>
-                        <h3 className='font-medium'>{item.name}</h3>
-                        <p className='text-sm text-muted-foreground'>
+                        <h3 className='font-medium text-lg'>{item.name}</h3>
+                        <p className='text-base text-muted-foreground'>
                           {item.price.toLocaleString()} ₩
                         </p>
                       </div>
 
-                      <div className='flex items-center gap-2'>
+                      <div className='flex items-center gap-3'>
                         <Button
                           variant='outline'
                           size='icon'
-                          className='h-8 w-8'
+                          className='h-12 w-12'
                           onClick={() =>
                             updateQuantity(
                               item.menuId,
@@ -65,26 +65,29 @@ export function CartDrawer() {
                             )
                           }
                         >
-                          <Minus className='h-4 w-4' />
+                          {/* TODO(@smosco): icon size */}
+                          <Minus />
                         </Button>
-                        <span className='w-8 text-center'>{item.quantity}</span>
+                        <span className='w-8 text-center text-lg'>
+                          {item.quantity}
+                        </span>
                         <Button
                           variant='outline'
                           size='icon'
-                          className='h-8 w-8'
+                          className='h-12 w-12'
                           onClick={() =>
                             updateQuantity(item.menuId, item.quantity + 1)
                           }
                         >
-                          <Plus className='h-4 w-4' />
+                          <Plus />
                         </Button>
                         <Button
                           variant='ghost'
                           size='icon'
-                          className='h-8 w-8'
+                          className='h-12 w-12'
                           onClick={() => removeItem(item.menuId)}
                         >
-                          <Trash2 className='h-4 w-4' />
+                          <Trash2 />
                         </Button>
                       </div>
                     </div>
@@ -93,10 +96,10 @@ export function CartDrawer() {
               )}
             </ScrollArea>
 
-            <div className='border-t pt-4 mt-4'>
-              <div className='flex justify-between mb-4'>
-                <span className='font-semibold'>Total Price</span>
-                <span className='font-semibold'>
+            <div className='border-t pt-6 mt-6'>
+              <div className='flex justify-between mb-6'>
+                <span className='font-semibold text-xl'>Total Price</span>
+                <span className='font-semibold text-xl'>
                   {total.toLocaleString()} ₩
                 </span>
               </div>
@@ -110,7 +113,6 @@ export function CartDrawer() {
         </SheetContent>
       </Sheet>
 
-      {/* 결제 모달 */}
       {orderId && (
         <PaymentModal
           orderId={orderId}

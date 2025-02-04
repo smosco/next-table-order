@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -73,32 +74,59 @@ export function MenuGrid() {
         {menuItems.map((item) => (
           <Card
             key={item.id}
-            className='overflow-hidden cursor-pointer transition-transform hover:scale-[1.02]'
+            className='overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105'
             onClick={() => setSelectedItem(item)}
           >
+            {/* TODO(@smosco): add image data */}
+            <Image
+              src='https://olo-images-live.imgix.net/28/288c61191b7c4deba30de5d6e7a62618.png?auto=format%2Ccompress&q=60&cs=tinysrgb&w=343&h=160&fit=fill&fm=png32&bg=transparent&s=2f0374c260416b3838b2c6e5dddf8d8f'
+              alt={item.name}
+              width={343}
+              height={160}
+              className='w-full h-40 object-cover'
+            />
             <CardContent className='p-4'>
-              <h3 className='font-semibold mb-1'>{item.name}</h3>
-              <p className='text-sm text-muted-foreground mb-2'>
+              <h3 className='text-lg font-semibold mb-2'>{item.name}</h3>
+              <p className='text-sm text-muted-foreground mb-3 line-clamp-2'>
                 {item.description}
               </p>
-              <p className='font-medium'>{item.price.toLocaleString()} ₩</p>
+              <div className='flex justify-between items-center'>
+                <Badge variant='secondary' className='text-lg'>
+                  {item.price.toLocaleString()} ₩
+                </Badge>
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
+      <Dialog
+        open={!!selectedItem}
+        onOpenChange={() => {
+          setSelectedItem(null);
+          setQuantity(1);
+        }}
+      >
         <DialogContent className='sm:max-w-[425px]'>
           {selectedItem && (
             <>
               <DialogHeader>
-                <DialogTitle>{selectedItem.name}</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className='text-2xl font-bold'>
+                  {selectedItem.name}
+                </DialogTitle>
+                <Image
+                  src='https://olo-images-live.imgix.net/28/288c61191b7c4deba30de5d6e7a62618.png?auto=format%2Ccompress&q=60&cs=tinysrgb&w=343&h=160&fit=fill&fm=png32&bg=transparent&s=2f0374c260416b3838b2c6e5dddf8d8f'
+                  alt={selectedItem.name}
+                  width={343}
+                  height={160}
+                  className='w-full h-48 object-cover rounded-md mb-4'
+                />
+                <DialogDescription className='text-base'>
                   {selectedItem.description}
                 </DialogDescription>
               </DialogHeader>
 
-              <div className='flex items-center justify-between mt-4'>
+              <div className='flex items-center justify-between mt-6'>
                 <div className='flex items-center gap-2'>
                   <Button
                     variant='outline'
@@ -107,7 +135,9 @@ export function MenuGrid() {
                   >
                     <Minus className='w-4 h-4' />
                   </Button>
-                  <span className='w-8 text-center'>{quantity}</span>
+                  <span className='w-8 text-center text-lg font-semibold'>
+                    {quantity}
+                  </span>
                   <Button
                     variant='outline'
                     size='icon'
@@ -116,8 +146,9 @@ export function MenuGrid() {
                     <Plus className='w-4 h-4' />
                   </Button>
                 </div>
-                <Button onClick={handleAddToCart}>
-                  Add to Order {selectedItem.price * quantity} ₩
+                <Button onClick={handleAddToCart} className='text-lg px-6 py-2'>
+                  Add to Order{' '}
+                  {(selectedItem.price * quantity).toLocaleString()} ₩
                 </Button>
               </div>
             </>
