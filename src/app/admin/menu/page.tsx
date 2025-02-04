@@ -23,11 +23,35 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import MenuForm from '@/components/admin/menu/MenuForm';
+import CategoryManager from '@/components/admin/menu/CategoryManager';
+import { useEffect } from 'react';
+
+type Category = {
+  id: string;
+  name: string;
+};
 
 export default function MenuPage() {
   const [items, setItems] = useState<MenuItem[]>(menuItems);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [newCategory, setNewCategory] = useState<string>('');
+
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await fetch('/api/public/categories');
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    }
+
+    fetchCategories();
+  }, []);
 
   const handleAddItem = (item: MenuItem) => {
     setItems([...items, { ...item, id: `item-${Date.now()}` }]);
@@ -51,12 +75,16 @@ export default function MenuPage() {
     }
   };
 
+  const handleMenuAdded = (newItem: MenuItem) => {
+    setItems([...items, newItem]);
+  };
+
   return (
     <div className='p-4'>
       <h2 className='text-2xl font-bold mb-4'>Menu Management</h2>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         {/* Menu Items */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Menu Items</CardTitle>
           </CardHeader>
@@ -100,112 +128,14 @@ export default function MenuPage() {
               </TableBody>
             </Table>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Item Add, Edit Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{editingItem ? 'Edit Item' : 'Add New Item'}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                const newItem: MenuItem = {
-                  id: editingItem ? editingItem.id : '',
-                  name: formData.get('name') as string,
-                  description: formData.get('description') as string,
-                  price: Number.parseFloat(formData.get('price') as string),
-                  categoryId: formData.get('categoryId') as string,
-                };
-                if (editingItem) {
-                  handleUpdateItem(newItem);
-                } else {
-                  handleAddItem(newItem);
-                }
-                e.currentTarget.reset();
-              }}
-            >
-              <div className='space-y-4'>
-                <div>
-                  <Label htmlFor='name'>Name</Label>
-                  <Input
-                    id='name'
-                    name='name'
-                    defaultValue={editingItem?.name}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor='description'>Description</Label>
-                  <Input
-                    id='description'
-                    name='description'
-                    defaultValue={editingItem?.description}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor='price'>Price</Label>
-                  <Input
-                    id='price'
-                    name='price'
-                    type='number'
-                    step='0.01'
-                    defaultValue={editingItem?.price}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor='categoryId'>Category</Label>
-                  <Select
-                    name='categoryId'
-                    defaultValue={editingItem?.categoryId}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='Select a category' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button type='submit'>
-                  {editingItem ? 'Update Item' : 'Add Item'}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+        <MenuForm categories={categories} onMenuAdded={handleMenuAdded} />
       </div>
 
       {/* Update Categories */}
-      <Card className='mt-4'>
-        <CardHeader>
-          <CardTitle>Categories</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className='flex space-x-2'>
-            <Input
-              placeholder='New category name'
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-            />
-            <Button onClick={handleAddCategory}>Add Category</Button>
-          </div>
-          <div className='mt-4 flex flex-wrap gap-2'>
-            {categories.map((category) => (
-              <div key={category.id} className='bg-gray-100 px-3 py-1 rounded'>
-                {category.name}
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <CategoryManager />
     </div>
   );
 }
