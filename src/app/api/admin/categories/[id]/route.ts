@@ -4,10 +4,10 @@ import { supabase } from '@/lib/supabaseClient';
 // 카테고리 수정 (PATCH)
 export async function PATCH(
   req: NextRequest,
-  context: { params: { id?: string } }
+  context: { params: Record<string, string> } // params 타입 변경
 ) {
   try {
-    const categoryId = context.params?.id;
+    const categoryId = context.params.id; // id는 항상 string
 
     if (!categoryId) {
       return NextResponse.json(
@@ -33,7 +33,7 @@ export async function PATCH(
 
     if (error) throw error;
 
-    return new NextResponse(null, { status: 204 }); // No Content 반환
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     return NextResponse.json(
       {
@@ -48,10 +48,10 @@ export async function PATCH(
 // 카테고리 삭제 (DELETE)
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id?: string } }
+  context: { params: Record<string, string> } // params 타입 변경
 ) {
   try {
-    const categoryId = context.params?.id;
+    const categoryId = context.params.id; // id가 무조건 string으로 보장됨
 
     if (!categoryId) {
       return NextResponse.json(
