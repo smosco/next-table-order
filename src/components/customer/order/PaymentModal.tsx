@@ -23,10 +23,13 @@ export function PaymentModal({
 }) {
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const [error, setError] = useState<string | null>(null);
   const { clearCart } = useCart();
 
   const handlePayment = async () => {
     setLoading(true);
+    setError(null);
+
     try {
       const response = await fetch('/api/public/payments', {
         method: 'POST',
@@ -38,11 +41,13 @@ export function PaymentModal({
       if (!response.ok) throw new Error(data.error);
 
       alert('Payment successful!');
+
+      // 주문 완료 후 장바구니 비우기
       clearCart();
       onClose();
     } catch (error: any) {
       console.error('Payment error:', error);
-      alert('Payment failed');
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -69,6 +74,7 @@ export function PaymentModal({
             Cash
           </Button>
         </div>
+        {error && <p className='text-red-500'>{error}</p>}
         <Button onClick={handlePayment} disabled={loading}>
           {loading ? 'Processing...' : 'Pay Now'}
         </Button>

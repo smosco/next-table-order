@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 주문 생성 (payment_id는 NULL)
+    // 1. 주문 생성
     const { data: orderData, error: orderError } = await supabase
       .from('orders')
       .insert([
@@ -32,8 +32,23 @@ export async function POST(req: Request) {
       .single();
 
     if (orderError) throw orderError;
+    const orderId = orderData.id;
 
-    return NextResponse.json({ orderId: orderData.id }, { status: 201 });
+    // 2️. `order_items`에 데이터 저장
+    const orderItemsData = items.map((item: any) => ({
+      order_id: orderId,
+      menu_id: item.menuId,
+      quantity: item.quantity,
+      price: item.price,
+    }));
+
+    const { error: orderItemsError } = await supabase
+      .from('order_items')
+      .insert(orderItemsData);
+
+    if (orderItemsError) throw orderItemsError;
+
+    return NextResponse.json({ orderId }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Unknown error' },
