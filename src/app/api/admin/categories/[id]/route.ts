@@ -4,17 +4,18 @@ import { supabase } from '@/lib/supabaseClient';
 // 카테고리 수정 (PATCH)
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id?: string } }
+  context: { params: { id?: string } }
 ) {
   try {
-    if (!params?.id) {
+    const categoryId = context.params?.id;
+
+    if (!categoryId) {
       return NextResponse.json(
         { error: 'Category ID is required.' },
         { status: 400 }
       );
     }
 
-    const categoryId = params.id;
     const body = await req.json();
     const { name } = body;
 
@@ -32,7 +33,7 @@ export async function PATCH(
 
     if (error) throw error;
 
-    return new NextResponse(null, { status: 204 }); // ✅ No Content 반환
+    return new NextResponse(null, { status: 204 }); // No Content 반환
   } catch (error) {
     return NextResponse.json(
       {
