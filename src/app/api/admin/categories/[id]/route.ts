@@ -48,10 +48,10 @@ export async function PATCH(
 // 카테고리 삭제 (DELETE)
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id?: string } }
 ) {
   try {
-    const categoryId = params?.id;
+    const categoryId = context.params?.id;
 
     if (!categoryId) {
       return NextResponse.json(
