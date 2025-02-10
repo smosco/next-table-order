@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/select';
 import { Globe } from 'lucide-react';
 
-export function TableInfo() {
+export function TableInfo({ tableNumber }: { tableNumber: string }) {
   return (
     <div className='flex items-center justify-between p-6 border-b'>
       <Select defaultValue='en'>
@@ -26,7 +26,7 @@ export function TableInfo() {
       </Select>
       <div className='flex items-center gap-3'>
         <span className='text-lg text-muted-foreground'>Table</span>
-        <span className='font-bold text-2xl text-primary'>102</span>
+        <span className='font-bold text-2xl text-primary'>{tableNumber}</span>
       </div>
     </div>
   );
