@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'olo-images-live.imgix.net',
       },
+      {
+        protocol: 'https',
+        hostname: 'phihwugemohmclgfnycr.supabase.co',
+      },
     ],
   },
 };
