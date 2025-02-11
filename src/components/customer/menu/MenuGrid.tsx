@@ -3,18 +3,9 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogHeader,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Minus, Plus } from 'lucide-react';
 import Image from 'next/image';
-import { useCart } from '@/app/CartProvider';
+import MenuDetailModal from './MenuDetailModal';
 
 interface MenuItem {
   id: string;
@@ -22,17 +13,16 @@ interface MenuItem {
   description: string;
   price: number;
   category_id: string;
+  image_url: string;
 }
 
 export function MenuGrid() {
   const router = useRouter();
   const [menuItems, setMenus] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
-  const [quantity, setQuantity] = useState(1);
+  const [selectedMenuId, setSelectedMenuId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const { addItem } = useCart();
 
   const fetchMenus = useCallback(async () => {
     setLoading(true);
@@ -76,7 +66,9 @@ export function MenuGrid() {
       });
 
       if (currentCategory) {
-        router.replace(`/customer/menu#${currentCategory}`, { scroll: false });
+        router.replace(`/customer/menu#${currentCategory}`, {
+          scroll: false,
+        });
       }
     }, 200);
   }, []);
@@ -88,21 +80,6 @@ export function MenuGrid() {
     ref.addEventListener('scroll', handleScroll);
     return () => ref.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
-
-  const handleAddToCart = () => {
-    if (!selectedItem) return;
-
-    addItem({
-      menuId: selectedItem.id,
-      name: selectedItem.name,
-      price: selectedItem.price,
-      quantity,
-      optionSelections: [],
-    });
-
-    setSelectedItem(null);
-    setQuantity(1);
-  };
 
   return (
     <div
@@ -117,10 +94,10 @@ export function MenuGrid() {
               <Card
                 key={item.id}
                 className='overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105'
-                onClick={() => setSelectedItem(item)}
+                onClick={() => setSelectedMenuId(item.id)}
               >
                 <Image
-                  src='/placeholder.png'
+                  src={item.image_url || '/placeholder.png'}
                   alt={item.name}
                   width={343}
                   height={160}
@@ -143,54 +120,11 @@ export function MenuGrid() {
         </div>
       ))}
 
-      <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
-        <DialogContent className='sm:max-w-[425px]'>
-          {selectedItem && (
-            <>
-              <DialogHeader>
-                <DialogTitle className='text-2xl font-bold'>
-                  {selectedItem.name}
-                </DialogTitle>
-                <Image
-                  src='https://olo-images-live.imgix.net/28/288c61191b7c4deba30de5d6e7a62618.png'
-                  alt={selectedItem.name}
-                  width={343}
-                  height={160}
-                  className='w-full h-48 object-cover rounded-md mb-4'
-                />
-                <DialogDescription className='text-base'>
-                  {selectedItem.description}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className='flex items-center justify-between mt-6'>
-                <div className='flex items-center gap-2'>
-                  <Button
-                    variant='outline'
-                    size='icon'
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  >
-                    <Minus className='w-4 h-4' />
-                  </Button>
-                  <span className='w-8 text-center text-lg font-semibold'>
-                    {quantity}
-                  </span>
-                  <Button
-                    variant='outline'
-                    size='icon'
-                    onClick={() => setQuantity((q) => q + 1)}
-                  >
-                    <Plus className='w-4 h-4' />
-                  </Button>
-                </div>
-                <Button onClick={handleAddToCart} className='text-lg px-6 py-2'>
-                  Add to Order {selectedItem.price * quantity} ₩
-                </Button>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* 메뉴 상세 모달 */}
+      <MenuDetailModal
+        menuId={selectedMenuId}
+        onClose={() => setSelectedMenuId(null)}
+      />
     </div>
   );
 }
