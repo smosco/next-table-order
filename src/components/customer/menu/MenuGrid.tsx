@@ -121,10 +121,12 @@ export function MenuGrid() {
       ))}
 
       {/* 메뉴 상세 모달 */}
-      <MenuDetailModal
-        menuId={selectedMenuId}
-        onClose={() => setSelectedMenuId(null)}
-      />
+      {!!selectedMenuId && (
+        <MenuDetailModal
+          menuId={selectedMenuId}
+          onClose={() => setSelectedMenuId(null)}
+        />
+      )}
     </div>
   );
 }

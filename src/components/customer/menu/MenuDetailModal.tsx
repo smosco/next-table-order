@@ -26,7 +26,7 @@ interface OptionGroup {
   name: string;
   is_required: boolean;
   max_select: number;
-  Options: Option[];
+  options: Option[];
 }
 
 interface MenuItem {
@@ -35,7 +35,7 @@ interface MenuItem {
   description: string;
   price: number;
   image_url: string;
-  OptionGroups: OptionGroup[];
+  option_groups: OptionGroup[];
 }
 
 export default function MenuDetailModal({
@@ -97,10 +97,11 @@ export default function MenuDetailModal({
 
     const selectedOptionDetails = Object.entries(selectedOptions).flatMap(
       ([groupId, optionIds]) =>
-        menu.OptionGroups.filter((group) => group.id === groupId).flatMap(
-          (group) =>
-            group.Options.filter((option) => optionIds.includes(option.id))
-        )
+        menu.option_groups
+          .filter((group) => group.id === groupId)
+          .flatMap((group) =>
+            group.options.filter((option) => optionIds.includes(option.id))
+          )
     );
 
     addItem({
@@ -116,6 +117,7 @@ export default function MenuDetailModal({
     });
 
     onClose();
+    setMenu(null);
     setQuantity(1);
     setSelectedOptions({});
   };
@@ -143,7 +145,7 @@ export default function MenuDetailModal({
             </DialogDescription>
 
             {/* 옵션 선택 UI */}
-            {menu?.OptionGroups?.map((group) => (
+            {menu?.option_groups?.map((group) => (
               <div key={group.id} className='mt-4'>
                 <h3 className='text-lg font-semibold'>{group.name}</h3>
 
@@ -155,7 +157,7 @@ export default function MenuDetailModal({
                       handleOptionChange(group.id, value, false)
                     }
                   >
-                    {group.Options.map((option) => (
+                    {group.options.map((option) => (
                       <div key={option.id} className='flex items-center gap-2'>
                         <RadioGroupItem value={option.id} id={option.id} />
                         <label htmlFor={option.id} className='text-sm'>
@@ -167,7 +169,7 @@ export default function MenuDetailModal({
                   </RadioGroup>
                 ) : (
                   <div className='mt-2 space-y-2'>
-                    {group.Options.map((option) => (
+                    {group.options.map((option) => (
                       <div key={option.id} className='flex items-center gap-2'>
                         <Checkbox
                           checked={
