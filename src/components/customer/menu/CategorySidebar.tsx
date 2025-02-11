@@ -1,78 +1,58 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useCategories } from '@/hooks/useCategories';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { MenuIcon } from 'lucide-react';
-
-type Category = {
-  id: string;
-  name: string;
-};
 
 export function CategorySidebar() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { data: categories } = useCategories();
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const router = useRouter();
   const pathname = usePathname();
-  const activeCategoryId = pathname.split('/').pop();
 
   useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const response = await fetch('/api/public/categories');
-        const data = await response.json();
-        setCategories(data);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {
+        setActiveCategory(hash);
+        scrollToCategory(hash);
       }
     }
-
-    fetchCategories();
   }, []);
 
+  const scrollToCategory = (categoryName: string) => {
+    const element = document.getElementById(`category-${categoryName}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleCategoryClick = (categoryName: string) => {
+    setActiveCategory(categoryName);
+    router.replace(`${pathname}#${categoryName}`, { scroll: false }); // URL 업데이트
+    scrollToCategory(categoryName); // 해당 카테고리로 스크롤 이동
+  };
+
   return (
-    <div className='w-64 border-r border-border h-full'>
-      <div className='p-6 border-b border-border'>
-        <h2 className='text-2xl font-bold text-primary flex items-center'>
-          <MenuIcon className='mr-2 h-6 w-6' />
-          Menu
-        </h2>
-      </div>
-      <ScrollArea className='h-[calc(100vh-5rem)]'>
+    <div className='w-64 border-r h-full'>
+      <ScrollArea className='h-full'>
         <nav className='p-4'>
-          <Link href='/customer/menu' passHref>
+          {categories?.map((category) => (
             <Button
+              key={category.id}
               variant='ghost'
               className={cn(
-                'w-full justify-start text-lg py-6 mb-2 hover:bg-accent/50 transition-colors',
-                activeCategoryId === 'menu' &&
+                'w-full text-lg py-4 mb-2 hover:bg-accent/50',
+                activeCategory === category.id &&
                   'bg-accent text-accent-foreground font-semibold'
               )}
+              onClick={() => handleCategoryClick(category.id)}
             >
-              All Categories
+              {category.name}
             </Button>
-          </Link>
-          <Separator className='my-4' />
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/customer/menu/${category.id}`}
-              passHref
-            >
-              <Button
-                variant='ghost'
-                className={cn(
-                  'w-full justify-start text-lg py-6 mb-2 hover:bg-accent/50 transition-colors',
-                  activeCategoryId === category.id &&
-                    'bg-accent text-accent-foreground font-semibold'
-                )}
-              >
-                {category.name}
-              </Button>
-            </Link>
           ))}
         </nav>
       </ScrollArea>
