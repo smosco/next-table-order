@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import MenuForm from '@/components/admin/menu/MenuForm';
 import CategoryManager from '@/components/admin/menu/CategoryManager';
+import { useToast } from '@/hooks/use-toast';
 
 type Category = {
   id: string;
@@ -24,6 +25,8 @@ export default function MenuPage() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+
+  const { toast } = useToast();
 
   // 카테고리 & 메뉴 데이터 불러오기
   useEffect(() => {
@@ -62,14 +65,25 @@ export default function MenuPage() {
   };
 
   // 메뉴 삭제 핸들러
-  const handleDeleteItem = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
-
+  const handleDeleteMenu = async (menuId: string) => {
     try {
-      await fetch(`/api/admin/menus/${id}`, { method: 'DELETE' });
-      setItems((prev) => prev.filter((item) => item.id !== id));
+      const response = await fetch(`/api/admin/menus?menuId=${menuId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+
+      toast({ title: 'Success', description: 'Menu deleted successfully!' });
+
+      // 메뉴 목록 갱신
+      setItems(items.filter((item) => item.id !== menuId));
     } catch (error) {
-      console.error('Error deleting item:', error);
+      toast({
+        title: 'Error',
+        description:
+          error instanceof Error ? error.message : 'Failed to delete menu',
+      });
     }
   };
 
@@ -112,7 +126,7 @@ export default function MenuPage() {
                       <Button
                         variant='destructive'
                         size='sm'
-                        onClick={() => handleDeleteItem(item.id!)}
+                        onClick={() => handleDeleteMenu(item.id!)}
                       >
                         Delete
                       </Button>

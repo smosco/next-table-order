@@ -74,3 +74,36 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+// 메뉴 삭제 (DELETE)
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const menuId = searchParams.get('menuId');
+
+    if (!menuId) {
+      return NextResponse.json(
+        { error: 'menuId is required' },
+        { status: 400 }
+      );
+    }
+
+    // 메뉴 삭제 (CASCADE로 옵션 그룹 & 옵션 자동 삭제됨)
+    const { error } = await supabase.from('menus').delete().eq('id', menuId);
+
+    if (error) throw error;
+
+    return NextResponse.json(
+      { message: 'Menu and related options deleted successfully.' },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : 'An unknown error occurred.',
+      },
+      { status: 500 }
+    );
+  }
+}
