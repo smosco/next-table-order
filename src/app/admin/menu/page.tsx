@@ -1,20 +1,8 @@
 'use client';
 
-import type React from 'react';
-import { useState } from 'react';
-import { menuItems, categories } from '@/mock/adminMockData';
+import { useState, useEffect } from 'react';
 import { type MenuItem } from '@/types/schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -23,9 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import MenuForm from '@/components/admin/menu/MenuForm';
 import CategoryManager from '@/components/admin/menu/CategoryManager';
-import { useEffect } from 'react';
 
 type Category = {
   id: string;
@@ -33,58 +21,64 @@ type Category = {
 };
 
 export default function MenuPage() {
-  const [items, setItems] = useState<MenuItem[]>(menuItems);
+  const [items, setItems] = useState<MenuItem[]>([]);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
-  const [newCategory, setNewCategory] = useState<string>('');
-
   const [categories, setCategories] = useState<Category[]>([]);
 
+  // 카테고리 & 메뉴 데이터 불러오기
   useEffect(() => {
-    async function fetchCategories() {
+    async function fetchData() {
       try {
-        const response = await fetch('/api/public/categories');
-        const data = await response.json();
-        setCategories(data);
+        const [categoriesRes, menusRes] = await Promise.all([
+          fetch('/api/public/categories'),
+          fetch('/api/public/menus'), // 메뉴도 서버에서 불러오기
+        ]);
+
+        const [categoriesData, menusData] = await Promise.all([
+          categoriesRes.json(),
+          menusRes.json(),
+        ]);
+
+        setCategories(categoriesData);
+        setItems(menusData);
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('Error fetching data:', error);
       }
     }
 
-    fetchCategories();
+    fetchData();
   }, []);
 
-  const handleAddItem = (item: MenuItem) => {
-    setItems([...items, { ...item, id: `item-${Date.now()}` }]);
-  };
-
-  const handleUpdateItem = (updatedItem: MenuItem) => {
-    setItems(
-      items.map((item) => (item.id === updatedItem.id ? updatedItem : item))
-    );
-    setEditingItem(null);
-  };
-
-  const handleDeleteItem = (id: string) => {
-    setItems(items.filter((item) => item.id !== id));
-  };
-
-  const handleAddCategory = () => {
-    if (newCategory) {
-      categories.push({ id: `category-${Date.now()}`, name: newCategory });
-      setNewCategory('');
+  // 메뉴 추가 및 수정 후 목록 갱신
+  const handleMenuUpdated = async () => {
+    try {
+      const response = await fetch('/api/admin/menus'); // 서버에서 최신 메뉴 목록 불러오기
+      const data = await response.json();
+      setItems(data);
+      setEditingItem(null); // 수정 후 폼 초기화
+    } catch (error) {
+      console.error('Error updating menu list:', error);
     }
   };
 
-  const handleMenuAdded = (newItem: MenuItem) => {
-    setItems([...items, newItem]);
+  // 메뉴 삭제 핸들러
+  const handleDeleteItem = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this item?')) return;
+
+    try {
+      await fetch(`/api/admin/menus/${id}`, { method: 'DELETE' });
+      setItems((prev) => prev.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error('Error deleting item:', error);
+    }
   };
 
   return (
     <div className='p-4'>
       <h2 className='text-2xl font-bold mb-4'>Menu Management</h2>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-        {/* Menu Items */}
-        {/* <Card>
+        {/* 메뉴 목록 테이블 */}
+        <Card>
           <CardHeader>
             <CardTitle>Menu Items</CardTitle>
           </CardHeader>
@@ -118,7 +112,7 @@ export default function MenuPage() {
                       <Button
                         variant='destructive'
                         size='sm'
-                        onClick={() => handleDeleteItem(item.id)}
+                        onClick={() => handleDeleteItem(item.id!)}
                       >
                         Delete
                       </Button>
@@ -128,13 +122,17 @@ export default function MenuPage() {
               </TableBody>
             </Table>
           </CardContent>
-        </Card> */}
+        </Card>
 
-        {/* Item Add, Edit Form */}
-        <MenuForm categories={categories} onMenuAdded={handleMenuAdded} />
+        {/* 메뉴 추가 및 수정 폼 */}
+        <MenuForm
+          categories={categories}
+          onMenuUpdated={handleMenuUpdated} // 메뉴 목록 갱신
+          menuToEdit={editingItem} // 수정할 아이템 전달
+        />
       </div>
 
-      {/* Update Categories */}
+      {/* 카테고리 관리 */}
       <CategoryManager />
     </div>
   );

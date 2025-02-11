@@ -19,12 +19,28 @@ export interface Category {
   name: string;
 }
 
+export interface Option {
+  id: UUID;
+  name: string;
+  price: number;
+}
+
+export interface OptionGroup {
+  id: UUID;
+  name: string;
+  is_required: boolean;
+  max_select: number;
+  options: Option[]; // 옵션 그룹 내 옵션 리스트
+}
+
 export interface MenuItem {
   id: UUID;
   name: string;
   description: string;
   price: number;
   categoryId: UUID;
+  image_url: string;
+  options?: OptionGroup[];
 }
 
 export interface Order {
