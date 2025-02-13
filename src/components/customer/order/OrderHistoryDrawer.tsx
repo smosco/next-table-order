@@ -6,8 +6,20 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetClose,
 } from '@/components/ui/sheet';
+
+interface OrderItem {
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+interface Order {
+  id: string;
+  created_at: string;
+  total_price: number;
+  items: OrderItem[]; // ✅ 올바른 타입 명시
+}
 
 export function OrderHistoryDrawer({
   isOpen,
@@ -18,7 +30,7 @@ export function OrderHistoryDrawer({
   setIsOpen: (open: boolean) => void;
   tableId: number;
 }) {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -39,13 +51,26 @@ export function OrderHistoryDrawer({
           {orders.length > 0 ? (
             <ul>
               {orders.map((order) => (
-                <li key={order.id} className='border-b py-2'>
-                  <span>{order.created_at}</span> - {order.total_price}원
+                <li key={order.id} className='border-b py-4'>
+                  <span className='block text-sm text-gray-500'>
+                    {new Date(order.created_at).toLocaleString()}
+                  </span>
+                  <span className='font-bold'>{order.total_price}원</span>
+                  <ul className='mt-2 text-sm text-gray-700'>
+                    {order.items.map((item: OrderItem, index: number) => (
+                      <li key={index} className='flex justify-between'>
+                        <span>
+                          {item.name} x {item.quantity}
+                        </span>
+                        <span>{item.price * item.quantity}원</span>
+                      </li>
+                    ))}
+                  </ul>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className='text-gray-500'>no order history</p>
+            <p className='text-gray-500'>No order history</p>
           )}
         </div>
       </SheetContent>

@@ -89,25 +89,65 @@ export async function GET(req: Request) {
       );
     }
 
-    // 현재 열린 order_group 찾기
-    const { data: orderGroup } = await supabase
+    // 1️. 현재 열린 order_group 찾기
+    const { data: orderGroup, error: groupError } = await supabase
       .from('order_groups')
       .select('id')
       .eq('table_id', tableId)
       .is('closed_at', null)
       .single();
 
-    if (!orderGroup) {
+    if (groupError || !orderGroup) {
       return NextResponse.json({ orders: [] }, { status: 200 });
     }
 
-    // 현재 order_group에 속한 주문들 조회
-    const { data: orders } = await supabase
+    // 2️. 현재 order_group에 속한 주문들 조회
+    const { data: orders, error: ordersError } = await supabase
       .from('orders')
-      .select('*')
+      .select('id, created_at, total_price')
       .eq('order_group_id', orderGroup.id);
 
-    return NextResponse.json({ orders }, { status: 200 });
+    if (ordersError || !orders.length) {
+      return NextResponse.json({ orders: [] }, { status: 200 });
+    }
+
+    // 3️. 주문 내역 조회 (order_items + menu_items 조인)
+    const { data: orderItems, error: orderItemsError } = await supabase
+      .from('order_items')
+      .select(
+        `
+        order_id,
+        quantity,
+        price,
+        menu_id,
+        menus!inner(name, price)
+      `
+      )
+      .in(
+        'order_id',
+        orders.map((order) => order.id)
+      );
+
+    if (orderItemsError) {
+      throw orderItemsError;
+    }
+
+    console.log('Order Items:', orderItems);
+
+    // 4️. orders 배열에 order_items 추가하여 응답 데이터 구성
+    const ordersWithItems = orders.map((order) => ({
+      ...order,
+      items: orderItems
+        .filter((item) => item.order_id === order.id)
+        .map((item) => ({
+          // TODO(@smosco): 타입 에러 수정
+          name: item.menus?.name || 'Unknown',
+          quantity: item.quantity,
+          price: item.price,
+        })),
+    }));
+
+    return NextResponse.json({ orders: ordersWithItems }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Unknown error' },
