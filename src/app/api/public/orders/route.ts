@@ -116,12 +116,12 @@ export async function GET(req: Request) {
       .from('order_items')
       .select(
         `
-        order_id,
-        quantity,
-        price,
-        menu_id,
-        menus!inner(name, price)
-      `
+    order_id,
+    quantity,
+    price,
+    menu_id,
+    menus(name, price)
+  `
       )
       .in(
         'order_id',
@@ -139,12 +139,14 @@ export async function GET(req: Request) {
       ...order,
       items: orderItems
         .filter((item) => item.order_id === order.id)
-        .map((item) => ({
-          // TODO(@smosco): 타입 에러 수정
-          name: item.menus?.name || 'Unknown',
-          quantity: item.quantity,
-          price: item.price,
-        })),
+        .map((item) => {
+          const menu = item.menus as unknown as { name: string; price: number }; // TypeScript가 단일 객체로 인식하도록 명시
+          return {
+            name: menu.name || 'Unknown',
+            quantity: item.quantity,
+            price: item.price,
+          };
+        }),
     }));
 
     return NextResponse.json({ orders: ordersWithItems }, { status: 200 });

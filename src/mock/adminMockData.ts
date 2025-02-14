@@ -36,6 +36,8 @@ export const menuItems: MenuItem[] = [
     description: 'A classic turkey sandwich with lettuce, tomato, and mayo.',
     price: 7.99,
     categoryId: 'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6',
+    image_url:
+      'https://olo-images-live.imgix.net/52/52a8f582c62a414da6002349857386d3.png?auto=format%2Ccompress&q=60&cs=tinysrgb&w=536&h=536&fit=fill&fm=png32&bg=transparent&s=0a3dec41e72992aa5d698396f63887cc',
   },
   {
     id: 'e5f6g7h8-i9j0-1k2l-3m4n-o5p6a1b2c3d4',
@@ -43,6 +45,8 @@ export const menuItems: MenuItem[] = [
     description: 'Grilled steak with melted cheese on a toasted roll.',
     price: 10.99,
     categoryId: 'b2c3d4e5-f6g7-8h9i-0j1k-l2m3n4o5p6a1',
+    image_url:
+      'https://olo-images-live.imgix.net/52/52a8f582c62a414da6002349857386d3.png?auto=format%2Ccompress&q=60&cs=tinysrgb&w=536&h=536&fit=fill&fm=png32&bg=transparent&s=0a3dec41e72992aa5d698396f63887cc',
   },
   {
     id: 'f6g7h8i9-j0k1-2l3m-4n5o-p6a1b2c3d4e5',
@@ -50,6 +54,8 @@ export const menuItems: MenuItem[] = [
     description: 'Freshly squeezed lemonade, served ice cold.',
     price: 2.99,
     categoryId: 'c3d4e5f6-g7h8-9i0j-1k2l-m3n4o5p6a1b2',
+    image_url:
+      'https://olo-images-live.imgix.net/52/52a8f582c62a414da6002349857386d3.png?auto=format%2Ccompress&q=60&cs=tinysrgb&w=536&h=536&fit=fill&fm=png32&bg=transparent&s=0a3dec41e72992aa5d698396f63887cc',
   },
 ];
 
