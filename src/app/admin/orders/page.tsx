@@ -23,6 +23,8 @@ type Order = {
 export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
 
+  console.log(orders);
+
   useEffect(() => {
     const eventSource = new EventSource('/api/admin/orders/stream');
 

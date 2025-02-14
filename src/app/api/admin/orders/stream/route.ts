@@ -16,24 +16,31 @@ export async function GET(req: NextRequest) {
     )
   );
 
-  const sendOrders = async () => {
-    const { data: orders, error } = await supabase
-      .from('orders')
-      .select(
-        `id, table_id, total_price, status, created_at,
-        order_items(id, quantity, price, menus(name, image_url))`
-      )
-      .order('created_at', { ascending: false })
-      .limit(10);
+  // Supabase Realtime을 사용하여 주문 상태 변경 감지
+  const channel = supabase
+    .channel('orders')
+    .on(
+      'postgres_changes', // Postgres 변경 감지
+      { event: '*', schema: 'public', table: 'orders' },
+      async (payload) => {
+        const { data: orders, error } = await supabase
+          .from('orders')
+          .select(
+            `id, table_id, total_price, status, created_at,
+            order_items(id, quantity, price, menus(name, image_url))`
+          )
+          .order('created_at', { ascending: false })
+          .limit(10);
 
-    if (error) return;
+        if (error) return;
 
-    writer.write(
-      new TextEncoder().encode(`data: ${JSON.stringify(orders)}\n\n`)
-    );
-  };
-
-  const interval = setInterval(sendOrders, 5000);
+        // 새로운 데이터가 감지되었을 때만 전송!
+        writer.write(
+          new TextEncoder().encode(`data: ${JSON.stringify(orders)}\n\n`)
+        );
+      }
+    )
+    .subscribe();
 
   return new Response(readable, {
     headers: { 'Content-Type': 'text/event-stream' },
