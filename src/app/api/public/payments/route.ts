@@ -39,12 +39,13 @@ export async function POST(req: Request) {
     const paymentId = paymentData.id;
 
     // 3️. 주문 상태 업데이트
-    const { error: updateOrderError } = await supabase
-      .from('orders')
-      .update({ status: 'completed', payment_id: paymentId })
-      .eq('id', orderId);
+    // TODO(@smosco): 결제 상태와 주문 상태는 무관
+    // const { error: updateOrderError } = await supabase
+    //   .from('orders')
+    //   .update({ status: 'completed', payment_id: paymentId })
+    //   .eq('id', orderId);
 
-    if (updateOrderError) throw updateOrderError;
+    // if (updateOrderError) throw updateOrderError;
 
     // 4️. `order_items`을 가져와서 `sales` 테이블에 저장
     const { data: orderItems, error: orderItemsError } = await supabase
