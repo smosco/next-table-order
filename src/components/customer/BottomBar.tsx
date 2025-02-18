@@ -5,6 +5,7 @@ import { useCart } from '@/app/CartProvider';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, History } from 'lucide-react';
 import { OrderHistoryDrawer } from './order/OrderHistoryDrawer';
+import { motion } from 'framer-motion';
 
 export function BottomBar() {
   const { total, setIsCartOpen } = useCart();
@@ -12,26 +13,30 @@ export function BottomBar() {
 
   return (
     <>
-      <div className='sticky bottom-0 border-t bg-background p-4 shadow-md'>
-        <div className='flex justify-end max-w-7xl mx-auto space-x-2'>
+      <motion.div
+        className='sticky bottom-0 bg-white shadow-lg rounded-t-2xl overflow-hidden'
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+      >
+        <div className='max-w-7xl mx-auto px-4 py-3 flex justify-between items-center'>
           <Button
-            className='text-lg py-6 px-8'
+            className='flex-1 mr-2 bg-toss-blue hover:bg-toss-blue-dark text-white font-medium py-4 rounded-xl transition-all duration-200 ease-in-out'
             onClick={() => setIsCartOpen(true)}
           >
-            <ShoppingCart className='mr-3 w-6 h-6' />
+            <ShoppingCart className='mr-2 w-5 h-5' />
             {total > 0 ? `Order Now ${total.toLocaleString()} ₩` : 'View Cart'}
           </Button>
           <Button
-            className='text-lg py-6 px-8'
+            className='bg-toss-gray-200 hover:bg-toss-gray-300 text-toss-gray-700 font-medium py-4 px-6 rounded-xl transition-all duration-200 ease-in-out'
             onClick={() => setIsOrderHistoryOpen(true)}
           >
-            <History className='mr-3 w-6 h-6' />
+            <History className='mr-2 w-5 h-5' />
             Order History
           </Button>
         </div>
-      </div>
+      </motion.div>
 
-      {/* 상태를 prop으로 전달 */}
       {isOrderHistoryOpen && (
         <OrderHistoryDrawer
           isOpen={isOrderHistoryOpen}

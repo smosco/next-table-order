@@ -5,7 +5,7 @@ import { CartProvider } from '@/app/CartProvider';
 import { CategorySidebar } from '@/components/customer/menu/CategorySidebar';
 import { TableInfo } from '@/components/customer/TableInfo';
 import { CartDrawer } from '@/components/customer/order/CartDrawer';
-import { BottomBar } from '@/components/customer/Footer';
+import { BottomBar } from '@/components/customer/BottomBar';
 import {
   Dialog,
   DialogContent,

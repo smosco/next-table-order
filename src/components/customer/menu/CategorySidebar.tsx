@@ -1,11 +1,9 @@
 'use client';
-
-import { useEffect } from 'react';
 import { useCategories } from '@/hooks/useCategories';
 import { useCategoryStore } from '@/stores/useCategoryStore';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { motion } from 'framer-motion';
 
 export function CategorySidebar() {
   const { data: categories } = useCategories();
@@ -20,26 +18,28 @@ export function CategorySidebar() {
 
   const handleCategoryClick = (categoryName: string) => {
     setActiveCategory(categoryName);
-    scrollToCategory(categoryName); // 해당 카테고리로 스크롤 이동
+    scrollToCategory(categoryName);
   };
 
   return (
-    <div className='w-64 border-r h-full'>
+    <div className='w-64 bg-white shadow-lg rounded-r-2xl overflow-hidden'>
       <ScrollArea className='h-full'>
-        <nav className='p-4'>
+        <nav className='p-4 space-y-2'>
           {categories?.map((category) => (
-            <Button
+            <motion.button
               key={category.id}
-              variant='ghost'
               className={cn(
-                'w-full text-lg py-4 mb-2 hover:bg-accent/50',
+                'w-full text-left px-4 py-3 rounded-xl transition-all duration-200 ease-in-out',
+                'text-toss-gray-700 hover:bg-toss-blue-light hover:text-toss-blue',
                 activeCategory === category.id &&
-                  'bg-accent text-accent-foreground font-semibold'
+                  'bg-toss-blue-light text-toss-blue font-medium'
               )}
               onClick={() => handleCategoryClick(category.id)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               {category.name}
-            </Button>
+            </motion.button>
           ))}
         </nav>
       </ScrollArea>
