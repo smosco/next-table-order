@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Option {
   id: string;
@@ -46,28 +47,13 @@ export default function MenuDetailModal({
   menuId: string | null;
   onClose: () => void;
 }) {
-  const [menu, setMenu] = useState<MenuItem | null>(null);
+  const queryClient = useQueryClient();
+  const menu = queryClient.getQueryData<MenuItem>(['menu', menuId]); // Tanstack Query에서 데이터 가져오기
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
   const [selectedOptions, setSelectedOptions] = useState<
     Record<string, string[]>
   >({});
-
-  useEffect(() => {
-    if (!menuId) return;
-
-    const fetchMenuDetail = async () => {
-      try {
-        const response = await fetch(`/api/public/menus/${menuId}`);
-        const data = await response.json();
-        setMenu(data);
-      } catch (error) {
-        console.error('Error fetching menu details:', error);
-      }
-    };
-
-    fetchMenuDetail();
-  }, [menuId]);
 
   const handleOptionChange = (
     groupId: string,
@@ -115,7 +101,6 @@ export default function MenuDetailModal({
     });
 
     onClose();
-    setMenu(null);
     setQuantity(1);
     setSelectedOptions({});
   };
