@@ -1,8 +1,11 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
 type OrderItem = {
   id: string;
@@ -20,10 +23,16 @@ type Order = {
   order_items: OrderItem[];
 };
 
+const statusColors = {
+  pending: 'bg-toss-red-500 text-white',
+  preparing: 'bg-toss-blue text-white',
+  ready: 'bg-toss-green-500 text-white',
+  served: 'bg-toss-gray-500 text-white',
+};
+
 export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
-
-  console.log(orders);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const eventSource = new EventSource('/api/admin/orders/stream');
@@ -31,10 +40,12 @@ export default function Orders() {
     eventSource.onmessage = (event) => {
       const updatedOrders: Order[] = JSON.parse(event.data);
       setOrders(updatedOrders);
+      setIsLoading(false);
     };
 
     eventSource.onerror = () => {
       eventSource.close();
+      setIsLoading(false);
     };
 
     return () => eventSource.close();
@@ -52,75 +63,107 @@ export default function Orders() {
   };
 
   return (
-    <div className='p-4 space-y-4'>
-      <h1 className='text-3xl font-bold mb-4'>실시간 주문 관리</h1>
-      {orders.map((order) => (
-        <Card key={order.id} className='bg-white shadow-lg'>
-          <CardContent className='p-6'>
-            <div className='flex justify-between items-center mb-4'>
-              <h2 className='text-2xl font-bold'>Table {order.table_id}</h2>
-              <Badge
-                variant={
-                  order.status === 'pending'
-                    ? 'destructive'
-                    : order.status === 'preparing'
-                    ? 'default'
-                    : order.status === 'ready'
-                    ? 'outline'
-                    : 'secondary'
-                }
-                className='text-lg px-3 py-1'
-              >
-                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-              </Badge>
-            </div>
-            <div className='space-y-2'>
-              {order.order_items.map((item) => (
-                <div key={item.id} className='flex items-center space-x-3'>
-                  {item.menus.image_url ? (
-                    <img
-                      src={item.menus.image_url}
-                      alt={item.menus.name}
-                      className='w-12 h-12 rounded'
-                    />
-                  ) : (
-                    <div className='w-12 h-12 bg-gray-300 rounded' />
-                  )}
-                  <span className='text-xl'>
-                    {item.menus.name} x {item.quantity}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div className='mt-4 text-lg text-gray-600'>
-              주문 시간: {new Date(order.created_at).toLocaleTimeString()}
-            </div>
-            <div className='mt-4 flex space-x-2'>
-              <Button
-                onClick={() => updateOrderStatus(order.id, 'preparing')}
-                disabled={order.status !== 'pending'}
-                className='text-lg'
-              >
-                조리 시작
-              </Button>
-              <Button
-                onClick={() => updateOrderStatus(order.id, 'ready')}
-                disabled={order.status !== 'preparing'}
-                className='text-lg'
-              >
-                조리 완료
-              </Button>
-              <Button
-                onClick={() => updateOrderStatus(order.id, 'served')}
-                disabled={order.status !== 'ready'}
-                className='text-lg'
-              >
-                서빙 완료
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className='p-6 bg-toss-gray-50 min-h-screen'
+    >
+      <h1 className='text-3xl font-bold mb-6 text-toss-gray-900'>
+        Real-time Order Management
+      </h1>
+      {isLoading ? (
+        <div className='flex justify-center items-center h-64'>
+          <Loader2 className='w-8 h-8 text-toss-blue animate-spin' />
+        </div>
+      ) : (
+        <AnimatePresence>
+          {orders.map((order) => (
+            <motion.div
+              key={order.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card className='bg-white shadow-md mb-6 overflow-hidden'>
+                <CardContent className='p-6'>
+                  <div className='flex justify-between items-center mb-4'>
+                    <h2 className='text-2xl font-bold text-toss-gray-900'>
+                      Table {order.table_id}
+                    </h2>
+                    <Badge
+                      className={`text-sm px-3 py-1 rounded-full ${
+                        statusColors[order.status]
+                      }`}
+                    >
+                      {order.status.charAt(0).toUpperCase() +
+                        order.status.slice(1)}
+                    </Badge>
+                  </div>
+                  <div className='space-y-4'>
+                    {order.order_items.map((item) => (
+                      <motion.div
+                        key={item.id}
+                        className='flex items-center space-x-4'
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {item.menus.image_url ? (
+                          <img
+                            src={item.menus.image_url || '/placeholder.svg'}
+                            alt={item.menus.name}
+                            className='w-16 h-16 rounded-lg object-cover'
+                          />
+                        ) : (
+                          <div className='w-16 h-16 bg-toss-gray-200 rounded-lg' />
+                        )}
+                        <div>
+                          <span className='text-lg font-medium text-toss-gray-900'>
+                            {item.menus.name}
+                          </span>
+                          <div className='text-sm text-toss-gray-600'>
+                            Quantity: {item.quantity} | Price: $
+                            {item.price.toFixed(2)}
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                  <div className='mt-4 text-sm text-toss-gray-600'>
+                    Order Time:{' '}
+                    {new Date(order.created_at).toLocaleTimeString()}
+                  </div>
+                  <div className='mt-4 flex space-x-2'>
+                    <Button
+                      onClick={() => updateOrderStatus(order.id, 'preparing')}
+                      disabled={order.status !== 'pending'}
+                      className='bg-toss-blue text-white hover:bg-toss-blue-dark transition-colors'
+                    >
+                      Start Cooking
+                    </Button>
+                    <Button
+                      onClick={() => updateOrderStatus(order.id, 'ready')}
+                      disabled={order.status !== 'preparing'}
+                      className='bg-toss-green-500 text-white hover:bg-toss-green-600 transition-colors'
+                    >
+                      Ready to Serve
+                    </Button>
+                    <Button
+                      onClick={() => updateOrderStatus(order.id, 'served')}
+                      disabled={order.status !== 'ready'}
+                      className='bg-toss-gray-500 text-white hover:bg-toss-gray-600 transition-colors'
+                    >
+                      Served
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      )}
+    </motion.div>
   );
 }

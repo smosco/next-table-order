@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
 interface Table {
   id: number;
@@ -25,7 +27,6 @@ interface Order {
   items: { name: string; quantity: number; price: number }[];
 }
 
-// 현재 테이블이 1~5번까지 있다고 가정
 const tables: Table[] = [
   { id: 1, name: 'Table 1' },
   { id: 2, name: 'Table 2' },
@@ -38,30 +39,34 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-
-  console.log('Fetched orders:', orders);
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  // 활성화된 테이블의 주문 조회 (order_group_id 기준으로 그룹화된 데이터)
   const fetchOrders = async () => {
+    setIsLoading(true);
     try {
       const res = await fetch('/api/admin/orders/active');
       const data = await res.json();
-      setOrders(data.orders); // ✅ 이제 orders는 order_group_id 기준으로 묶여 있음
+      setOrders(data.orders);
     } catch (err) {
       console.error('Failed to fetch orders:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch orders',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // 현재 테이블의 주문 정보 가져오기
   const getOrderByTableId = (tableId: number) =>
     orders.find((order) => order.table_id === tableId) || null;
 
-  // 테이블 주문 닫기 (order_group 종료)
   const closeTable = async (tableId: number) => {
     try {
       const res = await fetch('/api/admin/orders/close', {
@@ -77,93 +82,128 @@ export default function AdminOrders() {
         description: `Table ${tableId} closed successfully`,
       });
 
-      fetchOrders(); // 주문 목록 새로고침
+      fetchOrders();
     } catch (err) {
       console.error(err);
       toast({
         title: 'Error',
         description: 'Failed to close table',
+        variant: 'destructive',
       });
     }
   };
 
   return (
-    <div className='p-4'>
-      <h1 className='text-3xl font-bold mb-4'>Admin Orders</h1>
-      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'>
-        {tables.map((table) => {
-          const order = getOrderByTableId(table.id);
+    <div className='p-6 bg-toss-gray-50 min-h-screen'>
+      <h1 className='text-3xl font-bold mb-6 text-toss-gray-900'>
+        Admin Orders
+      </h1>
+      {isLoading ? (
+        <div className='flex justify-center items-center h-64'>
+          <Loader2 className='w-8 h-8 text-toss-blue animate-spin' />
+        </div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6'
+        >
+          <AnimatePresence>
+            {tables.map((table) => {
+              const order = getOrderByTableId(table.id);
 
-          return (
-            <Card key={table.id} className='flex flex-col justify-between'>
-              <CardContent className='pt-6'>
-                <h2 className='text-xl font-bold mb-2'>{table.name}</h2>
-                {order ? (
-                  <>
-                    <p className='mb-2 font-bold'>
-                      Total: ${order.total_price.toFixed(2)}
-                    </p>
-                    <Button
-                      className='w-full mb-2'
-                      onClick={() => {
-                        setSelectedOrder(order);
-                        setIsSheetOpen(true);
-                      }}
-                    >
-                      View Order
-                    </Button>
-                    <Button
-                      className='w-full'
-                      variant='destructive'
-                      onClick={() => closeTable(table.id)}
-                    >
-                      Close Table
-                    </Button>
-                  </>
-                ) : (
-                  <p className='text-gray-500'>No active orders</p>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+              return (
+                <motion.div key={table.id} layout>
+                  <Card className='overflow-hidden'>
+                    <CardContent className='p-6'>
+                      <h2 className='text-xl font-bold mb-4 text-toss-gray-900'>
+                        {table.name}
+                      </h2>
+                      {order ? (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                        >
+                          <p className='mb-4 font-semibold text-toss-blue text-lg'>
+                            ${order.total_price.toFixed(2)}
+                          </p>
+                          <Button
+                            className='w-full mb-2 bg-toss-blue hover:bg-toss-blue-dark text-white'
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setIsSheetOpen(true);
+                            }}
+                          >
+                            View Order
+                          </Button>
+                          <Button
+                            className='w-full bg-toss-red-500 hover:bg-toss-red-600 text-white'
+                            onClick={() => closeTable(table.id)}
+                          >
+                            Close Table
+                          </Button>
+                        </motion.div>
+                      ) : (
+                        <p className='text-toss-gray-500'>No active orders</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </motion.div>
+      )}
 
-      {/* 주문 상세 Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side='right'>
+        <SheetContent side='right' className='w-full sm:max-w-lg'>
           <SheetHeader>
-            <SheetTitle>Order Details</SheetTitle>
-            <SheetClose asChild>
-              <Button variant='ghost'>Close</Button>
-            </SheetClose>
+            <SheetTitle className='text-2xl font-bold text-toss-gray-900'>
+              Order Details
+            </SheetTitle>
           </SheetHeader>
-          <div className='p-4'>
+          <ScrollArea className='h-[calc(100vh-120px)] mt-6'>
             {selectedOrder && (
-              <>
-                <h2 className='text-xl font-bold mb-2'>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <h2 className='text-xl font-bold mb-2 text-toss-gray-900'>
                   {tables.find((t) => t.id === selectedOrder.table_id)?.name}
                 </h2>
-                <p className='mb-4 font-bold'>
-                  Total: ${selectedOrder.total_price.toFixed(2)}
+                <p className='mb-6 font-bold text-toss-blue text-2xl'>
+                  ${selectedOrder.total_price.toFixed(2)}
                 </p>
-                <ScrollArea className='max-h-[300px]'>
-                  {selectedOrder.items.length > 0 ? (
-                    selectedOrder.items.map((item, index) => (
-                      <div key={index} className='flex justify-between py-2'>
-                        <span>
-                          {item.name} x {item.quantity}
-                        </span>
-                        <span>${(item.price * item.quantity).toFixed(2)}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className='text-gray-500'>No items found</p>
-                  )}
-                </ScrollArea>
-              </>
+                {selectedOrder.items.length > 0 ? (
+                  selectedOrder.items.map((item, index) => (
+                    <motion.div
+                      key={index}
+                      className='flex justify-between py-3 border-b border-toss-gray-200 last:border-b-0'
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, delay: index * 0.05 }}
+                    >
+                      <span className='text-toss-gray-700'>
+                        {item.name} x {item.quantity}
+                      </span>
+                      <span className='font-medium text-toss-gray-900'>
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </span>
+                    </motion.div>
+                  ))
+                ) : (
+                  <p className='text-toss-gray-500'>No items found</p>
+                )}
+              </motion.div>
             )}
-          </div>
+          </ScrollArea>
+          <SheetClose asChild>
+            <Button className='mt-6 w-full bg-toss-gray-200 text-toss-gray-700 hover:bg-toss-gray-300'>
+              Close
+            </Button>
+          </SheetClose>
         </SheetContent>
       </Sheet>
     </div>

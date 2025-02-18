@@ -9,8 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion } from 'framer-motion';
 
-// 타입 정의
 type PopularMenuItem = {
   menuId: string;
   menuName: string;
@@ -31,23 +32,51 @@ export function PopularItems({ range }: { range: string }) {
   }, [range]);
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Menu Item</TableHead>
-          <TableHead>Sold Quantity</TableHead>
-          <TableHead>Revenue</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {items.map((item) => (
-          <TableRow key={item.menuId}>
-            <TableCell>{item.menuName}</TableCell>
-            <TableCell>{item.quantitySold} sold</TableCell>
-            <TableCell>{item.totalRevenue.toLocaleString()} ₩</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className='bg-white border-toss-gray-200'>
+        <CardHeader>
+          <CardTitle className='text-lg font-semibold text-toss-gray-900'>
+            Popular Items ({range})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className='text-toss-gray-700'>Menu Item</TableHead>
+                <TableHead className='text-toss-gray-700'>
+                  Sold Quantity
+                </TableHead>
+                <TableHead className='text-toss-gray-700'>Revenue</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map((item, index) => (
+                <motion.tr
+                  key={item.menuId}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                >
+                  <TableCell className='font-medium text-toss-gray-900'>
+                    {item.menuName}
+                  </TableCell>
+                  <TableCell className='text-toss-gray-700'>
+                    {item.quantitySold} sold
+                  </TableCell>
+                  <TableCell className='text-toss-gray-700'>
+                    {item.totalRevenue.toLocaleString()} ₩
+                  </TableCell>
+                </motion.tr>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
