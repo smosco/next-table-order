@@ -34,15 +34,14 @@ export interface OptionGroup {
 }
 
 export interface MenuItem {
-  // TODO(@smosco): 타입 문제 잠깐 우회
-  option_groups: never[];
-  id: UUID;
+  id?: string;
   name: string;
   description: string;
   price: number;
-  categoryId: UUID;
-  image_url: string;
-  options?: OptionGroup[];
+  category_id: string; // category_id → categoryId (통일 필요)
+  image?: File | null; // 추가: 사용자가 업로드한 파일
+  image_url?: string; // 기존의 URL
+  options: OptionGroup[];
 }
 
 export interface Order {

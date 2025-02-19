@@ -1,14 +1,24 @@
 'use client';
 
+import type React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash } from 'lucide-react';
-import { type MenuItem, type Category, type OptionGroup } from '@/types/schema';
+import { Plus, Trash, ImageIcon, ChevronDown, ChevronUp } from 'lucide-react';
+import type { MenuItem, Category, OptionGroup, Option } from '@/types/schema';
 import { Switch } from '@/components/ui/switch';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 export default function MenuForm({
   onMenuUpdated,
@@ -21,137 +31,61 @@ export default function MenuForm({
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+  const [formData, setFormData] = useState<MenuItem>({
+    id: '',
+    name: menuToEdit?.name || '',
+    description: menuToEdit?.description || '',
+    price: menuToEdit?.price || 0,
+    image: menuToEdit?.image || undefined,
+    image_url: menuToEdit?.image_url || undefined,
+    category_id: menuToEdit?.category_id || '',
+    options: menuToEdit?.options?.map((group) => ({
+      ...group,
+      options: group.options.map((option) => ({ ...option })),
+    })) || [
+      {
+        id: '1',
+        name: 'Option Group 1',
+        is_required: false,
+        max_select: 1,
+        options: [{ id: '1', name: 'Option 1', price: 0 }],
+      },
+    ],
+  });
 
-  // 카테고리 불러오기 유지
+  console.log(menuToEdit);
+
   useEffect(() => {
     async function fetchCategories() {
-      const res = await fetch('/api/public/categories');
-      const data = await res.json();
-      setCategories(data);
+      setLoading(true);
+      try {
+        const res = await fetch('/api/public/categories');
+        const data = await res.json();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        toast({
+          title: 'Error fetching categories',
+          description:
+            'There was an error fetching the categories. Please try again later.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
     }
     fetchCategories();
-  }, []);
+  }, [toast]); // Added toast to dependencies
 
-  // 데이터 유지 + 옵션 그룹 포함
   const initialFormState = {
     name: '',
     description: '',
-    price: '',
-    categoryId: '',
+    price: 0,
+    category_id: '',
     image: null as File | null,
     image_url: '',
     options: [] as OptionGroup[],
-  };
-
-  const [formData, setFormData] = useState(() =>
-    menuToEdit
-      ? {
-          ...menuToEdit,
-          price: menuToEdit.price.toString(),
-          image: null,
-          image_url: menuToEdit.image_url,
-          options: menuToEdit.option_groups ?? [],
-        }
-      : initialFormState
-  );
-
-  useEffect(() => {
-    if (menuToEdit) {
-      setFormData({
-        ...menuToEdit,
-        price: menuToEdit.price.toString(),
-        image: null,
-        image_url: menuToEdit.image_url,
-        options: menuToEdit.option_groups ?? [],
-      });
-    }
-  }, [menuToEdit]);
-
-  // 옵션 그룹 추가
-  const addOptionGroup = () => {
-    setFormData((prev) => ({
-      ...prev,
-      options: [
-        ...prev.options,
-        {
-          id: crypto.randomUUID(),
-          name: '',
-          is_required: false,
-          max_select: 1,
-          options: [],
-        },
-      ],
-    }));
-  };
-
-  // 옵션 추가
-  const addOption = (groupIndex: number) => {
-    setFormData((prev) => {
-      const newOptions = [...prev.options];
-      newOptions[groupIndex] = {
-        ...newOptions[groupIndex],
-        options: [
-          ...newOptions[groupIndex].options,
-          { id: crypto.randomUUID(), name: '', price: 0 },
-        ],
-      };
-      return { ...prev, options: newOptions };
-    });
-  };
-
-  // 옵션 그룹 수정 (name, is_required, max_select)
-  const updateOptionGroup = (
-    groupIndex: number,
-    key: 'name' | 'is_required' | 'max_select',
-    value: string | boolean | number
-  ) => {
-    setFormData((prev) => {
-      const newGroups = [...prev.options];
-      (newGroups[groupIndex] as any)[key] = value;
-      return { ...prev, options: newGroups };
-    });
-  };
-
-  // 옵션 수정 (name, price)
-  const updateOption = (
-    groupIndex: number,
-    optionIndex: number,
-    key: 'name' | 'price',
-    value: string | number
-  ) => {
-    setFormData((prev) => {
-      const newOptions = prev.options.map((group, gIndex) => {
-        if (gIndex === groupIndex) {
-          return {
-            ...group,
-            options: group.options.map((option, oIndex) =>
-              oIndex === optionIndex ? { ...option, [key]: value } : option
-            ),
-          };
-        }
-        return group;
-      });
-      return { ...prev, options: newOptions };
-    });
-  };
-
-  // 옵션 그룹 삭제
-  const removeOptionGroup = (groupIndex: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      options: prev.options.filter((_, index) => index !== groupIndex),
-    }));
-  };
-
-  // 옵션 삭제
-  const removeOption = (groupIndex: number, optionIndex: number) => {
-    setFormData((prev) => {
-      const newOptions = [...prev.options];
-      newOptions[groupIndex].options = newOptions[groupIndex].options.filter(
-        (_, index) => index !== optionIndex
-      );
-      return { ...prev, options: newOptions };
-    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -183,8 +117,8 @@ export default function MenuForm({
         body: JSON.stringify({
           name: formData.name,
           description: formData.description,
-          price: parseFloat(formData.price),
-          category_id: formData.categoryId,
+          price: formData.price,
+          category_id: formData.category_id,
           image_url: imageUrl,
           options: formData.options,
         }),
@@ -211,154 +145,355 @@ export default function MenuForm({
     }
   };
 
+  const updateOptionGroup = <K extends keyof OptionGroup>(
+    groupIndex: number,
+    key: K,
+    value: OptionGroup[K]
+  ) => {
+    setFormData((prev) => {
+      const updatedOptions = [...prev.options];
+      updatedOptions[groupIndex] = {
+        ...updatedOptions[groupIndex],
+        [key]: value,
+      };
+      return { ...prev, options: updatedOptions };
+    });
+  };
+
+  const updateOption = <K extends keyof Option>(
+    groupIndex: number,
+    optionIndex: number,
+    key: K,
+    value: Option[K]
+  ) => {
+    setFormData((prev) => {
+      const updatedOptions = [...prev.options];
+      updatedOptions[groupIndex].options[optionIndex] = {
+        ...updatedOptions[groupIndex].options[optionIndex],
+        [key]: value,
+      };
+      return { ...prev, options: updatedOptions };
+    });
+  };
+
+  const addOption = (groupIndex: number) => {
+    const updatedOptions = [...formData.options];
+    updatedOptions[groupIndex].options.push({ id: '', name: '', price: 0 });
+    setFormData({ ...formData, options: updatedOptions });
+  };
+
+  const removeOption = (groupIndex: number, optionIndex: number) => {
+    const updatedOptions = [...formData.options];
+    updatedOptions[groupIndex].options.splice(optionIndex, 1);
+    setFormData({ ...formData, options: updatedOptions });
+  };
+
+  const addOptionGroup = () => {
+    setFormData({
+      ...formData,
+      options: [
+        ...formData.options,
+        {
+          id: '',
+          name: 'Option Group',
+          is_required: false,
+          max_select: 1,
+          options: [{ id: '', name: '', price: 0 }],
+        },
+      ],
+    });
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          {menuToEdit ? 'Edit Menu Item' : 'Add New Menu Item'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form
-          onSubmit={handleSubmit}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-            }
-          }}
-          className='space-y-4'
-        >
-          <Label>Category</Label>
-          <select
-            value={formData.categoryId}
-            onChange={(e) =>
-              setFormData({ ...formData, categoryId: e.target.value })
-            }
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className='w-full max-w-2xl mx-auto shadow-md rounded-2xl overflow-hidden'>
+        <CardHeader className='bg-[#3182F6] text-white'>
+          <CardTitle className='text-2xl font-bold'>
+            {menuToEdit ? 'Edit Menu Item' : 'Add New Menu Item'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className='p-6 bg-gray-50'>
+          <form
+            onSubmit={handleSubmit}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+              }
+            }}
+            className='space-y-6'
           >
-            <option value=''>Select a category</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+            <div className='space-y-2'>
+              <Label className='text-sm font-medium'>Category</Label>
+              <Select
+                value={formData.category_id}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, category_id: value })
+                }
+              >
+                <SelectTrigger className='w-full'>
+                  <SelectValue placeholder='Select a category' />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <Label>Image</Label>
-          <Input
-            type='file'
-            accept='image/*'
-            ref={fileInputRef}
-            onChange={(e) =>
-              setFormData({ ...formData, image: e.target.files?.[0] || null })
-            }
-          />
+            <div className='space-y-2'>
+              <Label className='text-sm font-medium'>Image</Label>
+              <div
+                className='border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-[#3182F6] transition-colors'
+                onClick={handleImageClick}
+              >
+                {formData.image || formData.image_url ? (
+                  <img
+                    src={
+                      formData.image
+                        ? URL.createObjectURL(formData.image)
+                        : formData.image_url
+                    }
+                    alt='Menu item'
+                    className='max-h-40 mx-auto rounded-md'
+                  />
+                ) : (
+                  <div className='flex flex-col items-center text-gray-500'>
+                    <ImageIcon className='w-12 h-12 mb-2' />
+                    <span>Click to upload an image</span>
+                  </div>
+                )}
+                <input
+                  type='file'
+                  accept='image/*'
+                  ref={fileInputRef}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      image: e.target.files?.[0] || null,
+                    })
+                  }
+                  className='hidden'
+                />
+              </div>
+            </div>
 
-          <Label>Name</Label>
-          <Input
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-          />
-
-          <Label>Description</Label>
-          <Input
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            required
-          />
-
-          <Label>Price</Label>
-          <Input
-            type='number'
-            step='0.01'
-            value={formData.price}
-            onChange={(e) =>
-              setFormData({ ...formData, price: e.target.value })
-            }
-            required
-          />
-
-          {/* 옵션 그룹 및 옵션 UI */}
-          <Label>Options</Label>
-          {formData.options.map((group, groupIndex) => (
-            <div key={group.id} className='border p-3 mt-2'>
+            <div className='space-y-2'>
+              <Label className='text-sm font-medium'>Name</Label>
               <Input
-                placeholder='Option Group Name'
-                value={group.name}
+                value={formData.name}
                 onChange={(e) =>
-                  updateOptionGroup(groupIndex, 'name', e.target.value)
+                  setFormData({ ...formData, name: e.target.value })
                 }
+                required
+                className='transition-all focus:ring-2 focus:ring-[#3182F6]'
               />
+            </div>
 
-              <Label>Required</Label>
-              <Switch
-                checked={group.is_required}
-                onCheckedChange={(checked) =>
-                  updateOptionGroup(groupIndex, 'is_required', checked)
+            <div className='space-y-2'>
+              <Label className='text-sm font-medium'>Description</Label>
+              <Input
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
                 }
+                required
+                className='transition-all focus:ring-2 focus:ring-[#3182F6]'
               />
+            </div>
 
-              <Label>Max Select</Label>
+            <div className='space-y-2'>
+              <Label className='text-sm font-medium'>Price</Label>
               <Input
                 type='number'
-                value={group.max_select}
+                step='0.01'
+                value={formData.price}
                 onChange={(e) =>
-                  updateOptionGroup(
-                    groupIndex,
-                    'max_select',
-                    Number(e.target.value)
-                  )
+                  setFormData({ ...formData, price: Number(e.target.value) })
                 }
+                required
+                className='transition-all focus:ring-2 focus:ring-[#3182F6]'
               />
+            </div>
 
-              {group.options.map((option, optionIndex) => (
-                <div key={option.id} className='flex gap-2 mt-2'>
-                  <Input
-                    placeholder='Option Name'
-                    value={option.name}
-                    onChange={(e) =>
-                      updateOption(
-                        groupIndex,
-                        optionIndex,
-                        'name',
-                        e.target.value
-                      )
-                    }
-                  />
-                  <Input
-                    type='number'
-                    placeholder='Price'
-                    value={option.price}
-                    onChange={(e) =>
-                      updateOption(
-                        groupIndex,
-                        optionIndex,
-                        'price',
-                        Number(e.target.value)
-                      )
-                    }
-                  />
-                  <Button onClick={() => removeOption(groupIndex, optionIndex)}>
-                    <Trash className='w-4 h-4' />
-                  </Button>
-                </div>
-              ))}
-              <Button type='button' onClick={() => addOption(groupIndex)}>
-                Add Option
+            <div className='space-y-4'>
+              <Label className='text-lg font-semibold'>Options</Label>
+              <AnimatePresence>
+                {/* TODO(@smosco): edit, add 할때 타입 맞추기 options, option groups */}
+                {formData.options.map((group, groupIndex) => (
+                  <motion.div
+                    key={group.id}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className='border rounded-lg p-4 mt-2 bg-white shadow-sm'
+                  >
+                    <div className='flex justify-between items-center mb-2'>
+                      <Input
+                        placeholder='Option Group Name'
+                        value={group.name}
+                        onChange={(e) =>
+                          updateOptionGroup(groupIndex, 'name', e.target.value)
+                        }
+                        className='font-medium text-lg bg-transparent border-none focus:ring-0'
+                      />
+                      <Button
+                        type='button'
+                        variant='ghost'
+                        size='sm'
+                        onClick={() =>
+                          setExpandedGroup(
+                            expandedGroup === group.id ? null : group.id
+                          )
+                        }
+                      >
+                        {expandedGroup === group.id ? (
+                          <ChevronUp />
+                        ) : (
+                          <ChevronDown />
+                        )}
+                      </Button>
+                    </div>
+
+                    <AnimatePresence>
+                      {expandedGroup === group.id && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className='space-y-4'
+                        >
+                          <div className='flex items-center space-x-2'>
+                            <Switch
+                              checked={group.is_required}
+                              onCheckedChange={(checked) =>
+                                updateOptionGroup(
+                                  groupIndex,
+                                  'is_required',
+                                  checked
+                                )
+                              }
+                              className={cn(
+                                'data-[state=checked]:bg-[#3182F6]',
+                                'data-[state=unchecked]:bg-gray-200'
+                              )}
+                            />
+                            <Label>Required</Label>
+                          </div>
+
+                          <div className='flex items-center space-x-2'>
+                            <Label>Max Select</Label>
+                            <Input
+                              type='number'
+                              value={group.max_select}
+                              onChange={(e) =>
+                                updateOptionGroup(
+                                  groupIndex,
+                                  'max_select',
+                                  Number(e.target.value)
+                                )
+                              }
+                              className='w-20'
+                            />
+                          </div>
+
+                          {group.options.map((option, optionIndex) => (
+                            <motion.div
+                              key={option.id}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -10 }}
+                              className='flex gap-2 items-center'
+                            >
+                              <Input
+                                placeholder='Option Name'
+                                value={option.name}
+                                onChange={(e) =>
+                                  updateOption(
+                                    groupIndex,
+                                    optionIndex,
+                                    'name',
+                                    e.target.value
+                                  )
+                                }
+                                className='flex-grow'
+                              />
+                              <Input
+                                type='number'
+                                placeholder='Price'
+                                value={option.price}
+                                onChange={(e) =>
+                                  updateOption(
+                                    groupIndex,
+                                    optionIndex,
+                                    'price',
+                                    Number(e.target.value)
+                                  )
+                                }
+                                className='w-24'
+                              />
+                              <Button
+                                variant='ghost'
+                                size='icon'
+                                onClick={() =>
+                                  removeOption(groupIndex, optionIndex)
+                                }
+                              >
+                                <Trash className='w-4 h-4' />
+                              </Button>
+                            </motion.div>
+                          ))}
+                          <Button
+                            type='button'
+                            variant='outline'
+                            className='w-full mt-2 border-[#3182F6] text-[#3182F6] hover:bg-[#3182F6] hover:text-white'
+                            size='sm'
+                            onClick={() => addOption(groupIndex)}
+                          >
+                            <Plus className='w-4 h-4 mr-2' /> Add Option
+                          </Button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              <Button
+                type='button'
+                variant='outline'
+                className='w-full border-[#3182F6] text-[#3182F6] hover:bg-[#3182F6] hover:text-white'
+                onClick={addOptionGroup}
+              >
+                <Plus className='w-4 h-4 mr-2' /> Add Option Group
               </Button>
             </div>
-          ))}
-          <Button type='button' onClick={addOptionGroup}>
-            Add Option Group
-          </Button>
 
-          <Button type='submit' disabled={loading} className='w-full'>
-            {menuToEdit ? 'Update Menu' : 'Add Menu'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            <motion.div whileTap={{ scale: 0.95 }}>
+              <Button
+                type='submit'
+                disabled={loading}
+                className='w-full bg-[#3182F6] text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-[#1c6def] transition-all duration-300'
+              >
+                {loading
+                  ? 'Processing...'
+                  : menuToEdit
+                  ? 'Update Menu'
+                  : 'Add Menu'}
+              </Button>
+            </motion.div>
+          </form>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
