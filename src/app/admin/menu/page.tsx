@@ -10,7 +10,7 @@ export default function MenuPage() {
   const router = useRouter();
 
   const handleMenuAdded = () => {
-    router.push('/admin/menus');
+    router.push('/admin/menu');
   };
 
   return (

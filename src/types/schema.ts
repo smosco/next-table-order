@@ -34,6 +34,8 @@ export interface OptionGroup {
 }
 
 export interface MenuItem {
+  // TODO(@smosco): 타입 문제 잠깐 우회
+  option_groups: never[];
   id: UUID;
   name: string;
   description: string;

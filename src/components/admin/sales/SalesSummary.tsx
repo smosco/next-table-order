@@ -114,7 +114,7 @@ function SummaryCard({
             <span
               className={
                 percentage > 0
-                  ? 'text-toss-green-500'
+                  ? 'text--500'
                   : percentage < 0
                   ? 'text-toss-red-500'
                   : 'text-toss-gray-500'
