@@ -6,6 +6,14 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+type OrderItem = {
+  order_id: string;
+  quantity: number;
+  price: number;
+  menu_id: string;
+  menus: { name: string }; // 단일 객체로 확실하게 정의
+};
+
 export async function GET() {
   try {
     // 1️.현재 활성화된 주문 그룹 조회 (closed_at이 NULL인 order_groups)
@@ -36,7 +44,8 @@ export async function GET() {
       .in(
         'order_id',
         orders.map((order) => order.id)
-      );
+      )
+      .returns<OrderItem[]>();
 
     if (orderItemsError) throw orderItemsError;
 
@@ -62,7 +71,7 @@ export async function GET() {
         .forEach((item) => {
           if (!groupedItems[item.menu_id]) {
             groupedItems[item.menu_id] = {
-              name: item.menus?.[0]?.name || 'Unknown',
+              name: item.menus?.name || 'Unknown',
               quantity: 0,
               price: item.price,
             };
