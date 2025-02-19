@@ -16,28 +16,15 @@ export async function GET(req: NextRequest) {
     )
   );
 
-  // Supabase Realtime을 사용하여 주문 상태 변경 감지
+  // SSE에서 **주문이 추가되었다는 신호만 보냄**
   const channel = supabase
     .channel('orders')
     .on(
-      'postgres_changes', // Postgres 변경 감지
+      'postgres_changes',
       { event: '*', schema: 'public', table: 'orders' },
       async (payload) => {
-        const { data: orders, error } = await supabase
-          .from('orders')
-          .select(
-            `id, table_id, total_price, status, created_at,
-            order_items(id, quantity, price, menus(name, image_url))`
-          )
-          .order('created_at', { ascending: false })
-          .limit(10);
-
-        if (error) return;
-
-        // 새로운 데이터가 감지되었을 때만 전송!
-        writer.write(
-          new TextEncoder().encode(`data: ${JSON.stringify(orders)}\n\n`)
-        );
+        // 변화가 발생했다는 신호만 전송 (데이터 없음)
+        writer.write(new TextEncoder().encode(`data: update\n\n`));
       }
     )
     .subscribe();

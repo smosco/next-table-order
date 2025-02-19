@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,23 +34,35 @@ export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // ✅ **진행 중인 주문만 가져오는 API 호출**
+  const fetchOrders = useCallback(async () => {
+    const response = await fetch('/api/admin/orders');
+    const data = await response.json();
+    setOrders(data);
+    setIsLoading(false);
+  }, []);
+
+  // ✅ **초기 데이터 로딩**
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  // ✅ **SSE를 통한 실시간 업데이트 감지**
   useEffect(() => {
     const eventSource = new EventSource('/api/admin/orders/stream');
 
-    eventSource.onmessage = (event) => {
-      const updatedOrders: Order[] = JSON.parse(event.data);
-      setOrders(updatedOrders);
-      setIsLoading(false);
+    eventSource.onmessage = () => {
+      fetchOrders();
     };
 
     eventSource.onerror = () => {
       eventSource.close();
-      setIsLoading(false);
     };
 
     return () => eventSource.close();
-  }, []);
+  }, [fetchOrders]);
 
+  // ✅ **주문 상태 업데이트 API 호출**
   const updateOrderStatus = async (
     orderId: string,
     newStatus: 'preparing' | 'ready' | 'served'
@@ -67,14 +79,12 @@ export default function Orders() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className='p-6 bg-toss-gray-50 min-h-screen'
+      className='p-6 bg-gray-100 min-h-screen'
     >
-      <h1 className='text-3xl font-bold mb-6 text-toss-gray-900'>
-        Real-time Order Management
-      </h1>
+      <h1 className='text-3xl font-bold mb-6'>Real-time Order Management</h1>
       {isLoading ? (
         <div className='flex justify-center items-center h-64'>
-          <Loader2 className='w-8 h-8 text-toss-blue animate-spin' />
+          <Loader2 className='w-8 h-8 text-blue-500 animate-spin' />
         </div>
       ) : (
         <AnimatePresence>
@@ -89,7 +99,7 @@ export default function Orders() {
               <Card className='bg-white shadow-md mb-6 overflow-hidden'>
                 <CardContent className='p-6'>
                   <div className='flex justify-between items-center mb-4'>
-                    <h2 className='text-2xl font-bold text-toss-gray-900'>
+                    <h2 className='text-2xl font-bold'>
                       Table {order.table_id}
                     </h2>
                     <Badge
@@ -106,24 +116,21 @@ export default function Orders() {
                       <motion.div
                         key={item.id}
                         className='flex items-center space-x-4'
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.2 }}
                       >
                         {item.menus.image_url ? (
                           <img
-                            src={item.menus.image_url || '/placeholder.svg'}
+                            src={item.menus.image_url}
                             alt={item.menus.name}
                             className='w-16 h-16 rounded-lg object-cover'
                           />
                         ) : (
-                          <div className='w-16 h-16 bg-toss-gray-200 rounded-lg' />
+                          <div className='w-16 h-16 bg-gray-200 rounded-lg' />
                         )}
                         <div>
-                          <span className='text-lg font-medium text-toss-gray-900'>
+                          <span className='text-lg font-medium'>
                             {item.menus.name}
                           </span>
-                          <div className='text-sm text-toss-gray-600'>
+                          <div className='text-sm text-gray-600'>
                             Quantity: {item.quantity} | Price: $
                             {item.price.toFixed(2)}
                           </div>
@@ -131,7 +138,7 @@ export default function Orders() {
                       </motion.div>
                     ))}
                   </div>
-                  <div className='mt-4 text-sm text-toss-gray-600'>
+                  <div className='mt-4 text-sm text-gray-600'>
                     Order Time:{' '}
                     {new Date(order.created_at).toLocaleTimeString()}
                   </div>
