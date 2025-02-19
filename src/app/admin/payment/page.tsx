@@ -42,8 +42,6 @@ export default function AdminOrders() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  console.log(orders, selectedOrder);
-
   useEffect(() => {
     fetchOrders();
   }, []);

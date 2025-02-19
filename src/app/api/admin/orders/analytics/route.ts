@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -6,47 +6,59 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+type OrderItem = {
+  order_id: string;
+  quantity: number;
+  price: number;
+  menus: { name: string }; // 단일 객체로 확실하게 정의
+};
+
 export async function GET() {
   try {
-    // 1: `orders` 테이블에서 기본 정보 가져오기
-    let { data: orders, error: ordersError } = await supabase
+    // 1️. `orders` 테이블에서 기본 정보 가져오기
+    const { data: orders, error: ordersError } = await supabase
       .from('orders')
-      .select('id, table_id, total_price, status, created_at, payment_id');
+      .select('id, table_id, total_price, status, created_at');
 
     if (ordersError)
       throw new Error(`Orders fetch error: ${ordersError.message}`);
 
-    const orderList = orders ?? [];
-    if (orderList.length === 0)
+    if (!orders || orders.length === 0)
       return NextResponse.json({ orders: [] }, { status: 200 });
 
-    // 3: `order_items`에서 메뉴 정보 가져오기
-    let { data: orderItems, error: orderItemsError } = await supabase
+    const orderIds = orders.map((order) => order.id);
+
+    // 2️. `order_items`에서 메뉴 정보 가져오기
+    const { data: orderItems, error: orderItemsError } = await supabase
       .from('order_items')
       .select('order_id, quantity, price, menus(name)')
-      .in(
-        'order_id',
-        orderList.map((order) => order.id)
-      );
+      .in('order_id', orderIds)
+      .returns<OrderItem[]>();
 
     if (orderItemsError)
       throw new Error(`Order items fetch error: ${orderItemsError.message}`);
 
-    let { data: payments, error: paymentsError } = await supabase
-      .from('payments')
-      .select('id, payment_method, status')
-      .in('id', orderList.map((order) => order.payment_id).filter(Boolean));
+    // 3️. `payments`에서 결제 정보 가져오기 (order_id 기준)
+    let payments: any[] = [];
+    let paymentsError = null;
+
+    if (orderIds.length > 0) {
+      const { data, error } = await supabase
+        .from('payments')
+        .select('id, order_id, payment_method, status')
+        .in('order_id', orderIds);
+
+      payments = data ?? [];
+      paymentsError = error;
+    }
 
     if (paymentsError)
       throw new Error(`Payments fetch error: ${paymentsError.message}`);
 
-    const orderItemsList = orderItems ?? [];
-    const paymentList = payments ?? [];
-
-    // 5: 데이터 매핑
-    const ordersWithDetails = orderList.map((order) => {
-      const matchedPayment = paymentList.find((p) => p.id === order.payment_id);
-      const matchedItems = orderItemsList.filter(
+    // 4️. 데이터 매핑 (order_id 기준으로 payments 조인)
+    const ordersWithDetails = orders.map((order) => {
+      const matchedPayment = payments.find((p) => p.order_id === order.id); // ✅ 수정됨
+      const matchedItems = orderItems.filter(
         (item) => item.order_id === order.id
       );
 
@@ -59,9 +71,7 @@ export async function GET() {
         payment_method: matchedPayment?.payment_method || 'Unknown',
         payment_status: matchedPayment?.status || 'Unknown',
         items: matchedItems.map((item) => ({
-          menu_name: Array.isArray(item.menus)
-            ? item.menus[0]?.name
-            : 'Unknown',
+          menu_name: item.menus?.name || 'Unknown',
           quantity: item.quantity,
           price: item.price,
         })),
