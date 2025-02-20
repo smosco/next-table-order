@@ -14,15 +14,18 @@ function getStartEndDate(range: string): { start: string; end: string } {
 
   switch (range) {
     case 'week':
-      start = new Date(today.setDate(today.getDate() - 7));
+      start = new Date(today);
+      start.setDate(today.getDate() - 7);
       end = new Date();
       break;
     case 'month':
-      start = new Date(today.setMonth(today.getMonth() - 1));
+      start = new Date(today);
+      start.setMonth(today.getMonth() - 1);
       end = new Date();
       break;
     case 'year':
-      start = new Date(today.setFullYear(today.getFullYear() - 1));
+      start = new Date(today);
+      start.setFullYear(today.getFullYear() - 1);
       end = new Date();
       break;
     case 'today':
@@ -46,54 +49,20 @@ export async function GET(req: NextRequest) {
     // 기간 계산
     const { start, end } = getStartEndDate(range);
 
-    // console.log(`API Debug: Fetching top menus from ${start} to ${end}`);
-
-    // NOTE(@smosco):
-    // 특정 기간별 인기 메뉴 TOP 5를 조회하는 API
-    // - Supabase의 `sales` 테이블에서 `menu_id`별 총 판매량을 집계하여 인기 메뉴 반환
-    // - `GROUP BY`가 필요하기 때문에 Supabase의 `from()`을 사용하여 VIEW에서 데이터 조회
-    // - 초기에는 `rpc()`를 시도했으나, Supabase의 `rpc()`는 SQL 함수 호출용이므로 `from('popular_menus')`로 변경
-    // - `popular_menus` VIEW에는 `menu_id`, 총 판매량(`SUM(quantity)`), 총 매출(`SUM(total_price)`)을 포함
-    // - `created_at`을 추가하여 특정 기간별 데이터 필터링이 가능하도록 개선
-    const { data: sales, error } = await supabase
-      .from('popular_menus') // View를 조회할 땐 from()을 사용해야 함!
-      .select('*')
-      .gte('created_at', `${start}T00:00:00.000Z`)
-      .lte('created_at', `${end}T23:59:59.999Z`)
-      .order('total_quantity', { ascending: false })
-      .limit(5);
+    // `orders`와 `payments` 테이블을 활용하여 인기 메뉴 계산
+    const { data: topMenus, error } = await supabase.rpc('get_popular_menus', {
+      start_date: `${start}T00:00:00.000Z`,
+      end_date: `${end}T23:59:59.999Z`,
+    });
 
     if (error) throw error;
 
-    if (!sales || sales.length === 0) {
-      //   console.warn('Warning: No popular menu items found.');
+    if (!topMenus || topMenus.length === 0) {
       return NextResponse.json([], { status: 200 });
     }
 
-    // console.log('Aggregated Sales Data:', sales);
-
-    // TypeScript를 위한 명시적 타입 정의
-    type SalesWithMenu = {
-      menu_id: string;
-      total_quantity: number;
-      total_revenue: number;
-      menu_name: string;
-    };
-
-    // Supabase가 반환한 데이터를 타입 변환
-    const typedSales = sales as SalesWithMenu[];
-
-    // 최종 JSON 응답 데이터 변환
-    const popularMenus = typedSales.map((item) => ({
-      menuId: item.menu_id,
-      menuName: item.menu_name, // `menus.name`을 직접 참조
-      quantitySold: item.total_quantity, // 누적 판매량
-      totalRevenue: item.total_revenue, // 누적 매출
-    }));
-
-    return NextResponse.json(popularMenus);
+    return NextResponse.json(topMenus);
   } catch (error: any) {
-    // console.error('API Error:', error.message);
     return NextResponse.json(
       { error: error.message || 'Unknown error' },
       { status: 500 }

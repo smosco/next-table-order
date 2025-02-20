@@ -57,7 +57,7 @@ export default function SalesChart({ range }: { range: string }) {
               />
               <Line
                 type='monotone'
-                dataKey='totalRevenue'
+                dataKey='total_revenue'
                 stroke='#3182F6'
                 strokeWidth={2}
                 dot={{ fill: '#3182F6', strokeWidth: 2 }}

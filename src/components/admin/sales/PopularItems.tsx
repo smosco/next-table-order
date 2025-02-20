@@ -13,10 +13,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 
 type PopularMenuItem = {
-  menuId: string;
-  menuName: string;
-  quantitySold: number;
-  totalRevenue: number;
+  menu_id: string;
+  menu_name: string;
+  total_quantity: number;
+  total_revenue: number;
 };
 
 export function PopularItems({ range }: { range: string }) {
@@ -57,19 +57,19 @@ export function PopularItems({ range }: { range: string }) {
             <TableBody>
               {items.map((item, index) => (
                 <motion.tr
-                  key={item.menuId}
+                  key={item.menu_id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
                   <TableCell className='font-medium text-toss-gray-900'>
-                    {item.menuName}
+                    {item.menu_name}
                   </TableCell>
                   <TableCell className='text-toss-gray-700'>
-                    {item.quantitySold} sold
+                    {item.total_quantity} sold
                   </TableCell>
                   <TableCell className='text-toss-gray-700'>
-                    {item.totalRevenue.toLocaleString()} ₩
+                    {item.total_revenue.toLocaleString()} ₩
                   </TableCell>
                 </motion.tr>
               ))}
