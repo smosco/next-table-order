@@ -34,7 +34,7 @@ export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ✅ **진행 중인 주문만 가져오는 API 호출**
+  // 진행 중인 주문만 가져오는 API 호출
   const fetchOrders = useCallback(async () => {
     const response = await fetch('/api/admin/orders');
     const data = await response.json();
@@ -42,12 +42,12 @@ export default function Orders() {
     setIsLoading(false);
   }, []);
 
-  // ✅ **초기 데이터 로딩**
+  // 초기 데이터 로딩
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
-  // ✅ **SSE를 통한 실시간 업데이트 감지**
+  // SSE를 통한 실시간 업데이트 감지
   useEffect(() => {
     const eventSource = new EventSource('/api/admin/orders/stream');
 
@@ -62,7 +62,7 @@ export default function Orders() {
     return () => eventSource.close();
   }, [fetchOrders]);
 
-  // ✅ **주문 상태 업데이트 API 호출**
+  // 주문 상태 업데이트 API 호출
   const updateOrderStatus = async (
     orderId: string,
     newStatus: 'preparing' | 'ready' | 'served'

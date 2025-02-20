@@ -20,7 +20,7 @@ export default function EditMenuPage() {
   }, [id]);
 
   const handleMenuUpdated = () => {
-    router.push('/admin/menus');
+    router.push('/admin/menu');
   };
 
   return menu ? (

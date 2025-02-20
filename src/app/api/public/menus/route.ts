@@ -13,7 +13,7 @@ export async function GET() {
       option_groups (
         id, name, is_required, max_select,
         options ( id, name, price )
-      )
+      ), status
     `);
 
   if (error) {

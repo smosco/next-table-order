@@ -20,6 +20,8 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
+type MenuStatus = 'available' | 'sold_out' | 'hidden';
+
 export default function MenuForm({
   onMenuUpdated,
   menuToEdit,
@@ -33,7 +35,7 @@ export default function MenuForm({
   const { toast } = useToast();
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const [formData, setFormData] = useState<MenuItem>({
-    id: '',
+    id: menuToEdit?.id || '',
     name: menuToEdit?.name || '',
     description: menuToEdit?.description || '',
     price: menuToEdit?.price || 0,
@@ -52,6 +54,7 @@ export default function MenuForm({
         options: [{ id: '1', name: 'Option 1', price: 0 }],
       },
     ],
+    status: menuToEdit?.status || 'hidden',
   });
 
   console.log(menuToEdit);
@@ -86,6 +89,7 @@ export default function MenuForm({
     image: null as File | null,
     image_url: '',
     options: [] as OptionGroup[],
+    status: 'hidden' as 'hidden' | 'sold_out' | 'available',
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,37 +98,42 @@ export default function MenuForm({
 
     try {
       let imageUrl = formData.image_url;
+
       if (formData.image) {
         const uploadForm = new FormData();
         uploadForm.append('image', formData.image);
+
         const res = await fetch('/api/admin/upload-image', {
           method: 'POST',
           body: uploadForm,
         });
+
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Image upload failed.');
         imageUrl = data.imageUrl;
       }
 
-      const apiUrl = menuToEdit
-        ? `/api/admin/menus/${menuToEdit.id}`
-        : '/api/admin/menus';
-      const method = menuToEdit ? 'PUT' : 'POST';
+      const apiUrl = `/api/admin/menus`;
+      const method = menuToEdit ? 'PATCH' : 'POST';
 
       const res = await fetch(apiUrl, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          menuId: formData.id, // menuId 명확히 전달
           name: formData.name,
           description: formData.description,
           price: formData.price,
           category_id: formData.category_id,
           image_url: imageUrl,
           options: formData.options,
+          status: formData.status,
         }),
       });
 
-      if (!res.ok) throw new Error('Failed to save menu');
+      const responseData = await res.json();
+
+      if (!res.ok) throw new Error(responseData.error || 'Failed to save menu');
 
       toast({
         title: 'Success',
@@ -135,10 +144,13 @@ export default function MenuForm({
       if (fileInputRef.current) fileInputRef.current.value = '';
       onMenuUpdated();
     } catch (error) {
+      console.error('Error submitting form:', error);
+
       toast({
         title: 'Error',
         description:
           error instanceof Error ? error.message : 'Unexpected error',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -476,6 +488,25 @@ export default function MenuForm({
               >
                 <Plus className='w-4 h-4 mr-2' /> Add Option Group
               </Button>
+            </div>
+
+            <div className='space-y-2'>
+              <Label className='text-sm font-medium'>Menu Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, status: value as MenuStatus })
+                }
+              >
+                <SelectTrigger className='w-full'>
+                  <SelectValue placeholder='Select menu status' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='available'>Available</SelectItem>
+                  <SelectItem value='sold_out'>Sold Out</SelectItem>
+                  <SelectItem value='hidden'>Hidden</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <motion.div whileTap={{ scale: 0.95 }}>

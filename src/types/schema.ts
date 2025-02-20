@@ -42,6 +42,7 @@ export interface MenuItem {
   image?: File | null; // 추가: 사용자가 업로드한 파일
   image_url?: string; // 기존의 URL
   options: OptionGroup[];
+  status: 'hidden' | 'sold_out' | 'available';
 }
 
 export interface Order {

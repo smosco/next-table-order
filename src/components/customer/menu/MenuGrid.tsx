@@ -31,6 +31,7 @@ interface MenuItem {
   category_id: string;
   image_url: string;
   option_groups: OptionGroup[];
+  status: 'hidden' | 'sold_out' | 'available';
 }
 
 export function MenuGrid() {
@@ -45,8 +46,10 @@ export function MenuGrid() {
       const response = await fetch('/api/public/menus');
       return response.json();
     },
-    staleTime: 1000 * 60 * 60, // 1시간 동안 유지
+    // staleTime: 1000 * 60 * 60, // 1시간 동안 유지
   });
+
+  console.log(menuItems);
 
   useEffect(() => {
     if (menuItems.length > 0) {
@@ -87,16 +90,29 @@ export function MenuGrid() {
                     transition={{ duration: 0.3 }}
                   >
                     <Card
-                      className='overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105'
-                      onClick={() => setSelectedMenuId(item.id)}
+                      className={`overflow-hidden cursor-pointer transition-all duration-300 ${
+                        item.status === 'sold_out'
+                          ? 'opacity-50 cursor-not-allowed' // 품절된 메뉴 스타일 변경
+                          : 'hover:shadow-lg hover:scale-105'
+                      }`}
+                      onClick={() =>
+                        item.status !== 'sold_out' && setSelectedMenuId(item.id)
+                      }
                     >
-                      <Image
-                        src={item.image_url || '/placeholder.png'}
-                        alt={item.name}
-                        width={343}
-                        height={200}
-                        className='w-full h-48 object-cover'
-                      />
+                      <div className='relative'>
+                        <Image
+                          src={item.image_url || '/placeholder.png'}
+                          alt={item.name}
+                          width={343}
+                          height={200}
+                          className='w-full h-48 object-cover'
+                        />
+                        {item.status === 'sold_out' && (
+                          <div className='absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-xs font-bold rounded'>
+                            sold_out
+                          </div>
+                        )}
+                      </div>
                       <CardContent className='p-4'>
                         <h3 className='text-lg font-semibold mb-2 text-toss-gray-900'>
                           {item.name}
