@@ -29,6 +29,7 @@ interface MenuItem {
   description: string;
   price: number;
   category_id: string;
+  category_name: string;
   image_url: string;
   option_groups: OptionGroup[];
   status: 'hidden' | 'sold_out' | 'available';
@@ -38,6 +39,7 @@ export function MenuGrid() {
   const { activeCategory, setActiveCategory } = useCategoryStore();
   const queryClient = useQueryClient();
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [selectedMenuId, setSelectedMenuId] = useState<string | null>(null);
 
   const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
@@ -46,10 +48,7 @@ export function MenuGrid() {
       const response = await fetch('/api/public/menus');
       return response.json();
     },
-    // staleTime: 1000 * 60 * 60, // 1시간 동안 유지
   });
-
-  console.log(menuItems);
 
   useEffect(() => {
     if (menuItems.length > 0) {
@@ -60,12 +59,34 @@ export function MenuGrid() {
   }, [menuItems, queryClient]);
 
   const groupedMenus = useMemo(() => {
-    return menuItems.reduce<Record<string, MenuItem[]>>((acc, item) => {
-      if (!acc[item.category_id]) acc[item.category_id] = [];
-      acc[item.category_id].push(item);
+    return menuItems.reduce<
+      Record<string, { name: string; items: MenuItem[] }>
+    >((acc, item) => {
+      if (!acc[item.category_id]) {
+        acc[item.category_id] = { name: item.category_name || '', items: [] };
+      }
+      acc[item.category_id].items.push(item);
       return acc;
     }, {});
   }, [menuItems]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleCategory = entries.find((entry) => entry.isIntersecting);
+        if (visibleCategory) {
+          setActiveCategory(visibleCategory.target.id.replace('category-', ''));
+        }
+      },
+      { root: menuRef.current, threshold: 0.1 }
+    );
+
+    Object.values(categoryRefs.current).forEach((category) => {
+      if (category) observer.observe(category);
+    });
+
+    return () => observer.disconnect();
+  }, [groupedMenus, setActiveCategory]);
 
   return (
     <div className='flex flex-col h-full'>
@@ -76,10 +97,17 @@ export function MenuGrid() {
         {isLoading ? (
           <p>Loading...</p>
         ) : (
-          Object.entries(groupedMenus).map(([category, items]) => (
-            <div key={category} id={`category-${category}`}>
+          Object.entries(groupedMenus).map(([categoryId, { name, items }]) => (
+            <div
+              key={categoryId}
+              id={`category-${categoryId}`}
+              ref={(el) => {
+                categoryRefs.current[categoryId] = el;
+              }}
+              className='pb-10 border-b-2 border-gray-200'
+            >
               <h2 className='text-2xl font-bold mb-6 text-toss-gray-900'>
-                {category}
+                {name}
               </h2>
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
                 {items.map((item) => (
@@ -92,7 +120,7 @@ export function MenuGrid() {
                     <Card
                       className={`overflow-hidden cursor-pointer transition-all duration-300 ${
                         item.status === 'sold_out'
-                          ? 'opacity-50 cursor-not-allowed' // 품절된 메뉴 스타일 변경
+                          ? 'opacity-50 cursor-not-allowed'
                           : 'hover:shadow-lg hover:scale-105'
                       }`}
                       onClick={() =>

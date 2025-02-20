@@ -9,7 +9,7 @@ const supabase = createClient(
 export async function GET() {
   // 전체 메뉴 불러오기 (옵션 그룹과 옵션 포함)
   const { data: menus, error } = await supabase.from('menus').select(`
-      id, name, description, price, image_url, category_id,
+      id, name, description, price, image_url, category_id, categories(name),
       option_groups (
         id, name, is_required, max_select,
         options ( id, name, price )
