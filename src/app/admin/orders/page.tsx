@@ -49,13 +49,21 @@ export default function Orders() {
 
   // SSE를 통한 실시간 업데이트 감지
   useEffect(() => {
+    console.log('streaming');
     const eventSource = new EventSource('/api/admin/orders/stream');
 
-    eventSource.onmessage = () => {
-      fetchOrders();
+    console.log(eventSource.onmessage);
+
+    eventSource.onmessage = (event) => {
+      console.log('이벤트', event);
+      if (event.data === 'payment_success') {
+        console.log('✅ Payment success event received! Refetching orders...');
+        fetchOrders(); // 주문 목록 다시 불러오기
+      }
     };
 
-    eventSource.onerror = () => {
+    eventSource.onerror = (error) => {
+      console.error('❌ SSE Error:', error);
       eventSource.close();
     };
 

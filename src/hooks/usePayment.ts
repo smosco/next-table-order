@@ -22,7 +22,7 @@ export function usePayment() {
 
     try {
       const response = await fetch('/api/public/payments/checkout', {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tableId, items, totalPrice, paymentMethod }),
       });

@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function POST(req: Request) {
   try {
-    const { tableId, items, totalPrice } = await req.json();
+    const { tableId, items, totalPrice, paymentMethod } = await req.json();
 
     if (!items || items.length === 0) {
       return NextResponse.json(
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1. 현재 열린 `order_group`이 있는지 확인
+    // 1️. 현재 열린 order_group 찾기
     let { data: existingGroup } = await supabase
       .from('order_groups')
       .select('id')
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       .is('closed_at', null)
       .single();
 
-    // 2. 없으면 새로 생성
+    // 2️. 새 order_group 생성 (없다면)
     if (!existingGroup) {
       const { data: newGroup, error: groupError } = await supabase
         .from('order_groups')
@@ -38,14 +38,14 @@ export async function POST(req: Request) {
 
     const orderGroupId = existingGroup.id;
 
-    // 3. 주문 생성 (`order_group_id` 포함)
+    // 3️. 주문 생성
     const { data: orderData, error: orderError } = await supabase
       .from('orders')
       .insert([
         {
           table_id: tableId,
           total_price: totalPrice,
-          status: 'pending',
+          status: 'pending', // 주문 상태
           order_group_id: orderGroupId,
         },
       ])
@@ -66,7 +66,20 @@ export async function POST(req: Request) {
     const { error: orderItemsError } = await supabase
       .from('order_items')
       .insert(orderItemsData);
+
     if (orderItemsError) throw orderItemsError;
+
+    // 5️. 초기 결제 정보 생성 (status = 'pending')
+    const { error: paymentError } = await supabase.from('payments').insert([
+      {
+        order_id: orderId,
+        amount: totalPrice,
+        payment_method: paymentMethod,
+        status: 'pending', // 초기 상태
+      },
+    ]);
+
+    if (paymentError) throw paymentError;
 
     return NextResponse.json({ orderId, orderGroupId }, { status: 201 });
   } catch (error: any) {
@@ -76,7 +89,6 @@ export async function POST(req: Request) {
     );
   }
 }
-
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);

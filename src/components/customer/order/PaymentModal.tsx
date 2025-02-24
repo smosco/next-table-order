@@ -32,7 +32,7 @@ export function PaymentModal({
 
     try {
       const response = await fetch('/api/public/payments', {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId, paymentMethod }),
       });
