@@ -10,11 +10,21 @@ export async function GET(req: NextRequest) {
   const { data: orders, error } = await supabase
     .from('orders')
     .select(
-      `id, table_id, total_price, status, created_at,
-      order_items(id, quantity, price, menus(name, image_url))`
+      `
+      id, table_id, total_price, status, created_at,
+      order_items(
+        id, quantity, price,
+        menus(name, image_url),
+        order_item_options(
+          option_id, option_price,
+          options(name)
+        )
+      )
+    `
     )
     .in('status', ['pending', 'preparing', 'ready']) // 서빙된 주문 제외
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(10);
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {

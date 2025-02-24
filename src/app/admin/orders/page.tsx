@@ -7,11 +7,20 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
+type OrderOption = {
+  name: string;
+};
+
 type OrderItem = {
   id: string;
   quantity: number;
   price: number;
   menus: { name: string; image_url: string | null };
+  order_item_options: {
+    options_id: string;
+    options_price: string;
+    options: OrderOption;
+  }[];
 };
 
 type Order = {
@@ -118,26 +127,35 @@ export default function Orders() {
                     {order.order_items.map((item) => (
                       <motion.div
                         key={item.id}
-                        className='flex items-center space-x-4'
+                        className='flex flex-col space-y-2 bg-gray-50 p-3 rounded-lg'
                       >
-                        {item.menus.image_url ? (
-                          <img
-                            src={item.menus.image_url}
-                            alt={item.menus.name}
-                            className='w-16 h-16 rounded-lg object-cover'
-                          />
-                        ) : (
-                          <div className='w-16 h-16 bg-gray-200 rounded-lg' />
-                        )}
-                        <div>
-                          <span className='text-lg font-medium'>
-                            {item.menus.name}
-                          </span>
-                          <div className='text-sm text-gray-600'>
-                            Quantity: {item.quantity} | Price: $
-                            {item.price.toFixed(2)}
+                        <div className='flex items-center space-x-4'>
+                          {item.menus.image_url ? (
+                            <img
+                              src={item.menus.image_url}
+                              alt={item.menus.name}
+                              className='w-16 h-16 rounded-lg object-cover'
+                            />
+                          ) : (
+                            <div className='w-16 h-16 bg-gray-200 rounded-lg' />
+                          )}
+                          <div>
+                            <span className='text-lg font-medium'>
+                              {item.menus.name} x {item.quantity}
+                            </span>
                           </div>
                         </div>
+
+                        {/* 옵션 정보 표시 */}
+                        {item.order_item_options.length > 0 && (
+                          <ul className='mt-1 text-sm text-toss-gray-700'>
+                            {item.order_item_options.map((opt, i) => (
+                              <li key={i} className='flex justify-between'>
+                                <span>- {opt.options.name}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </motion.div>
                     ))}
                   </div>

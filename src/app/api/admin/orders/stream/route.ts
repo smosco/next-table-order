@@ -10,8 +10,6 @@ export async function GET(req: NextRequest) {
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
 
-  console.log('뭐해?');
-
   writer.write(
     new TextEncoder().encode(
       'HTTP/1.1 200 OK\nContent-Type: text/event-stream\nCache-Control: no-cache\nConnection: keep-alive\n\n'
