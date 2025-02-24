@@ -8,23 +8,35 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetClose,
 } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronRight } from 'lucide-react';
 
 interface Table {
   id: number;
   name: string;
 }
 
+interface OrderOption {
+  name: string;
+  price: number;
+}
+
+interface OrderItem {
+  name: string;
+  quantity: number;
+  basePrice: number;
+  totalPrice: number;
+  options: OrderOption[];
+}
+
 interface Order {
   table_id: number;
   total_price: number;
   order_group_id: string;
-  items: { name: string; quantity: number; price: number }[];
+  items: OrderItem[];
 }
 
 const tables: Table[] = [
@@ -94,20 +106,18 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className='p-6 bg-toss-gray-50 min-h-screen'>
-      <h1 className='text-3xl font-bold mb-6 text-toss-gray-900'>
-        Admin Orders
-      </h1>
+    <div className='p-6 bg-gray-50 min-h-screen'>
+      <h1 className='text-3xl font-bold mb-6 text-gray-900'>Admin Orders</h1>
       {isLoading ? (
         <div className='flex justify-center items-center h-64'>
-          <Loader2 className='w-8 h-8 text-toss-blue animate-spin' />
+          <Loader2 className='w-8 h-8 text-blue-500 animate-spin' />
         </div>
       ) : (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6'
+          transition={{ duration: 0.3 }}
+          className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
         >
           <AnimatePresence>
             {tables.map((table) => {
@@ -115,37 +125,39 @@ export default function AdminOrders() {
 
               return (
                 <motion.div key={table.id} layout>
-                  <Card className='overflow-hidden'>
-                    <CardContent className='p-6'>
-                      <h2 className='text-xl font-bold mb-4 text-toss-gray-900'>
+                  <Card className='overflow-hidden hover:shadow-md transition-shadow duration-200'>
+                    <CardContent className='p-4'>
+                      <h2 className='text-lg font-semibold mb-2 text-gray-900'>
                         {table.name}
                       </h2>
                       {order ? (
                         <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
+                          className='space-y-2'
                         >
-                          <p className='mb-4 font-semibold text-toss-blue text-lg'>
+                          <p className='font-medium text-blue-600 text-lg'>
                             ${order.total_price.toFixed(2)}
                           </p>
                           <Button
-                            className='w-full mb-2 bg-toss-blue hover:bg-toss-blue-dark text-white'
+                            className='w-full justify-between bg-white text-blue-600 border border-blue-600 hover:bg-blue-50'
                             onClick={() => {
                               setSelectedOrder(order);
                               setIsSheetOpen(true);
                             }}
                           >
                             View Order
+                            <ChevronRight size={16} />
                           </Button>
                           <Button
-                            className='w-full bg-toss-red-500 hover:bg-toss-red-600 text-white'
+                            className='w-full bg-red-500 hover:bg-red-600 text-white'
                             onClick={() => closeTable(table.id)}
                           >
                             Close Table
                           </Button>
                         </motion.div>
                       ) : (
-                        <p className='text-toss-gray-500'>No active orders</p>
+                        <p className='text-gray-500'>No active orders</p>
                       )}
                     </CardContent>
                   </Card>
@@ -157,53 +169,75 @@ export default function AdminOrders() {
       )}
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side='right' className='w-full sm:max-w-lg'>
-          <SheetHeader>
-            <SheetTitle className='text-2xl font-bold text-toss-gray-900'>
+        <SheetContent side='right' className='w-full sm:max-w-md p-0'>
+          <SheetHeader className='p-6 border-b border-gray-200'>
+            <SheetTitle className='text-2xl font-bold text-gray-900'>
               Order Details
             </SheetTitle>
           </SheetHeader>
-          <ScrollArea className='h-[calc(100vh-120px)] mt-6'>
+          <ScrollArea className='h-[calc(100vh-180px)] px-6'>
             {selectedOrder && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
+                className='py-6'
               >
-                <h2 className='text-xl font-bold mb-2 text-toss-gray-900'>
+                <h2 className='text-xl font-bold mb-2 text-gray-900'>
                   {tables.find((t) => t.id === selectedOrder.table_id)?.name}
                 </h2>
-                <p className='mb-6 font-bold text-toss-blue text-2xl'>
+                <p className='mb-6 font-bold text-blue-600 text-2xl'>
                   ${selectedOrder.total_price.toFixed(2)}
                 </p>
+
                 {selectedOrder.items.length > 0 ? (
                   selectedOrder.items.map((item, index) => (
                     <motion.div
                       key={index}
-                      className='flex justify-between py-3 border-b border-toss-gray-200 last:border-b-0'
+                      className='py-3 border-b border-gray-200 last:border-b-0'
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.2, delay: index * 0.05 }}
                     >
-                      <span className='text-toss-gray-700'>
-                        {item.name} x {item.quantity}
-                      </span>
-                      <span className='font-medium text-toss-gray-900'>
-                        ${(item.price * item.quantity).toFixed(2)}
-                      </span>
+                      <div className='flex justify-between items-start'>
+                        <div>
+                          <span className='font-medium text-gray-900'>
+                            {item.name}
+                          </span>
+                          <span className='ml-2 text-sm text-gray-600'>
+                            x {item.quantity}
+                          </span>
+                        </div>
+                        <span className='font-medium text-gray-900'>
+                          ${item.totalPrice.toFixed(2)}
+                        </span>
+                      </div>
+
+                      {item.options.length > 0 && (
+                        <ul className='mt-1 space-y-1'>
+                          {item.options.map((opt, i) => (
+                            <li
+                              key={i}
+                              className='flex justify-between text-sm'
+                            >
+                              <span className='text-gray-600'>
+                                - {opt.name}
+                              </span>
+                              <span className='text-gray-900'>
+                                +${opt.price.toFixed(2)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </motion.div>
                   ))
                 ) : (
-                  <p className='text-toss-gray-500'>No items found</p>
+                  <p className='text-gray-500'>No items found</p>
                 )}
               </motion.div>
             )}
           </ScrollArea>
-          <SheetClose asChild>
-            <Button className='mt-6 w-full bg-toss-gray-200 text-toss-gray-700 hover:bg-toss-gray-300'>
-              Close
-            </Button>
-          </SheetClose>
         </SheetContent>
       </Sheet>
     </div>
