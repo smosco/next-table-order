@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '@/app/CartProvider';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -21,6 +21,15 @@ export function CartDrawer() {
   } = useCart();
   const [orderId, setOrderId] = useState<string | null>(null);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+  const [tableId, setTableId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // 로컬스토리지에서 테이블 ID 가져오기
+    const storedTableId = localStorage.getItem('tableId');
+    if (storedTableId) {
+      setTableId(storedTableId);
+    }
+  }, []);
 
   const handleOrderSuccess = (orderId: string) => {
     setOrderId(orderId);
@@ -159,11 +168,19 @@ export function CartDrawer() {
                   {total.toLocaleString()} ₩
                 </span>
               </div>
-              <OrderButton
-                tableId={1}
-                cartItems={items}
-                onOrderSuccess={handleOrderSuccess}
-              />
+
+              {/* 테이블 ID가 있을 때만 주문 가능하도록 수정 */}
+              {tableId ? (
+                <OrderButton
+                  tableId={parseInt(tableId, 10)}
+                  cartItems={items}
+                  onOrderSuccess={handleOrderSuccess}
+                />
+              ) : (
+                <p className='text-center text-red-500 font-medium'>
+                  Please select table first
+                </p>
+              )}
             </motion.div>
           </div>
         </SheetContent>

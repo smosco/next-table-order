@@ -7,11 +7,9 @@ import { Globe, ChevronDown } from 'lucide-react';
 const languages = [
   { code: 'en', name: 'English' },
   { code: 'ko', name: '한국어' },
-  { code: 'ja', name: '日本語' },
-  { code: 'zh', name: '中文' },
 ];
 
-export function TableInfo({ tableNumber }: { tableNumber: string }) {
+export function TableInfo({ tableName }: { tableName: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
 
@@ -64,8 +62,7 @@ export function TableInfo({ tableNumber }: { tableNumber: string }) {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <span className='text-sm font-medium text-toss-gray-600'>Table</span>
-        <span className='text-2xl font-bold text-toss-blue'>{tableNumber}</span>
+        <span className='text-2xl font-bold text-toss-blue'>{tableName}</span>
       </motion.div>
     </div>
   );
