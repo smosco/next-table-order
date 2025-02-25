@@ -45,6 +45,7 @@ export function Sidebar() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
             >
+              {/* TODO(@smosco): link 이동일 때 로그인 여부 제대로 판단 못함 (url 쳐서 이동은 잘됨) */}
               <Link href={item.href}>
                 <span
                   className={cn(
