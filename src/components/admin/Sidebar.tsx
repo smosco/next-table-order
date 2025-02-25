@@ -10,17 +10,19 @@ import {
   CreditCard,
   CodeIcon as ChartColumnIncreasing,
   UtensilsCrossed,
-  Settings,
+  // Settings,
+  Grid2X2Plus,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const sidebarNavItems = [
   { title: 'Dashboard', href: '/admin', icon: Home },
   { title: 'Orders', href: '/admin/orders', icon: ClipboardList },
-  { title: 'Payment', href: '/admin/payment', icon: CreditCard },
+  { title: 'Payments', href: '/admin/payments', icon: CreditCard },
   { title: 'Analytics', href: '/admin/analytics', icon: ChartColumnIncreasing },
-  { title: 'Menu', href: '/admin/menu', icon: UtensilsCrossed },
-  { title: 'Settings', href: '/admin/settings', icon: Settings },
+  { title: 'Menus', href: '/admin/menus', icon: UtensilsCrossed },
+  { title: 'Tables', href: '/admin/tables', icon: Grid2X2Plus },
+  // { title: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export function Sidebar() {
