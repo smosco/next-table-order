@@ -16,20 +16,15 @@ export async function GET(req: NextRequest) {
     )
   );
 
-  // SSE에서 결제 완료(payments.status = 'success') 신호만 보냄
   const channel = supabase
-    .channel('payments')
+    .channel('orders')
     .on(
       'postgres_changes',
-      { event: '*', schema: 'public', table: 'payments' },
+      { event: '*', schema: 'public', table: 'orders' },
       async (payload) => {
-        // console.log(payload);
-        if (
-          payload.eventType === 'UPDATE' &&
-          payload.new.status === 'success'
-        ) {
-          writer.write(new TextEncoder().encode(`data: payment_success\n\n`));
-        }
+        console.log('🔔 주문 상태 변경 감지:', payload);
+        // TODO(@smosco): 필요하다면 이벤트에 따라 다른 data를 넘겨서 여러 개의 트리거를 만들 수 있음
+        writer.write(new TextEncoder().encode(`data: order_updated\n\n`));
       }
     )
     .subscribe();

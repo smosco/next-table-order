@@ -27,7 +27,7 @@ interface OrderItem {
 
 export async function POST(req: Request) {
   try {
-    const { tableId, items, totalPrice, paymentMethod } = await req.json();
+    const { tableId, items, totalPrice } = await req.json();
 
     if (!items || items.length === 0) {
       return NextResponse.json(
@@ -57,14 +57,15 @@ export async function POST(req: Request) {
 
     const orderGroupId = existingGroup.id;
 
-    // 3. 주문 생성
+    // 3. 주문 생성 (`payment_status: 'pending'` 추가)
     const { data: orderData, error: orderError } = await supabase
       .from('orders')
       .insert([
         {
           table_id: tableId,
-          total_price: totalPrice, // 총 가격을 그대로 저장 (옵션 제외 메뉴만 포함함)
-          status: 'pending',
+          total_price: totalPrice,
+          status: 'pending', // 주문 상태는 기본적으로 'pending'
+          payment_status: 'pending', // 결제 상태 추가
           order_group_id: orderGroupId,
         },
       ])
@@ -74,12 +75,12 @@ export async function POST(req: Request) {
     if (orderError) throw orderError;
     const orderId = orderData.id;
 
-    // 4. 주문 항목 추가 (메뉴 가격 포함)
+    // 4. 주문 항목 추가
     const orderItemsData = items.map((item: any) => ({
       order_id: orderId,
       menu_id: item.menuId,
       quantity: item.quantity,
-      price: item.price, // 주문 당시의 메뉴 가격 저장
+      price: item.price,
     }));
 
     const { data: insertedOrderItems, error: orderItemsError } = await supabase
@@ -89,7 +90,7 @@ export async function POST(req: Request) {
 
     if (orderItemsError) throw orderItemsError;
 
-    // 5. 주문 항목 옵션 추가 (옵션 가격 포함)
+    // 5. 주문 항목 옵션 추가
     const orderItemOptionsData = [];
 
     for (const orderItem of insertedOrderItems) {
@@ -99,7 +100,7 @@ export async function POST(req: Request) {
           orderItemOptionsData.push({
             order_item_id: orderItem.id,
             option_id: option.optionId,
-            option_price: option.price, // 주문 당시의 옵션 가격 저장
+            option_price: option.price,
           });
         }
       }
@@ -112,6 +113,17 @@ export async function POST(req: Request) {
 
       if (orderItemOptionsError) throw orderItemOptionsError;
     }
+
+    // 6. 주문 결제 요청(`payments`) 자동 생성 (pending 상태)
+    const { error: paymentError } = await supabase.from('payments').insert([
+      {
+        order_id: orderId,
+        amount: totalPrice,
+        status: 'pending', // 기본 결제 상태
+      },
+    ]);
+
+    if (paymentError) throw paymentError;
 
     return NextResponse.json({ orderId, orderGroupId }, { status: 201 });
   } catch (error: any) {

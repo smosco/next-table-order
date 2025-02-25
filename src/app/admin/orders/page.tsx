@@ -61,7 +61,7 @@ export default function Orders() {
     const eventSource = new EventSource('/api/admin/orders/stream');
 
     eventSource.onmessage = (event) => {
-      if (event.data === 'payment_success') {
+      if (event.data === 'order_updated') {
         fetchOrders(); // 주문 목록 다시 불러오기
       }
     };

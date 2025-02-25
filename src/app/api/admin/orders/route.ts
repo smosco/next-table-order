@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     .from('orders')
     .select(
       `
-      id, table_id, total_price, status, created_at,
+      id, table_id, total_price, status, payment_status, created_at,
       order_items(
         id, quantity, price,
         menus(name, image_url),
@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
       )
     `
     )
+    .eq('payment_status', 'paid') // 결제 완료된 주문만 불러오기
     .in('status', ['pending', 'preparing', 'ready']) // 서빙된 주문 제외
     .order('created_at', { ascending: false })
     .limit(10);
