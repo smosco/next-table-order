@@ -48,6 +48,7 @@ export function MenuGrid() {
       const response = await fetch('/api/public/menus');
       return response.json();
     },
+    staleTime: 1000 * 60 * 60, // 1시간 동안 캐시 유지
   });
 
   useEffect(() => {

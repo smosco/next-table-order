@@ -49,6 +49,7 @@ export default function MenuDetailModal({
 }) {
   const queryClient = useQueryClient();
   const menu = queryClient.getQueryData<MenuItem>(['menu', menuId]); // Tanstack Query에서 데이터 가져오기
+
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
   const [selectedOptions, setSelectedOptions] = useState<
