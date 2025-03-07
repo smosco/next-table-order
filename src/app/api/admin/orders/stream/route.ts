@@ -17,14 +17,20 @@ export async function GET(req: NextRequest) {
   );
 
   const channel = supabase
-    .channel('orders')
+    .channel('order_events')
     .on(
       'postgres_changes',
-      { event: '*', schema: 'public', table: 'orders' },
+      { event: 'INSERT', schema: 'public', table: 'order_events' },
       async (payload) => {
-        console.log('🔔 주문 상태 변경 감지:', payload);
-        // TODO(@smosco): 필요하다면 이벤트에 따라 다른 data를 넘겨서 여러 개의 트리거를 만들 수 있음
-        writer.write(new TextEncoder().encode(`data: order_updated\n\n`));
+        console.log('🔔 새로운 주문 이벤트 발생:', payload.new);
+
+        const eventType = payload.new.event_type;
+        const orderId = payload.new.order_id;
+
+        // ✅ 변경된 주문 ID를 SSE로 전송
+        writer.write(
+          new TextEncoder().encode(`data: ${eventType}:${orderId}\n\n`)
+        );
       }
     )
     .subscribe();

@@ -43,7 +43,7 @@ export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 진행 중인 주문만 가져오는 API 호출
+  //  전체 주문 목록 가져오는 API (초기 로딩)
   const fetchOrders = useCallback(async () => {
     const response = await fetch('/api/admin/orders');
     const data = await response.json();
@@ -51,18 +51,44 @@ export default function Orders() {
     setIsLoading(false);
   }, []);
 
-  // 초기 데이터 로딩
+  //  특정 주문 ID만 가져와 업데이트하는 API
+  const fetchUpdatedOrder = async (orderId: string) => {
+    const response = await fetch(`/api/admin/orders/${orderId}`);
+    const updatedOrder = await response.json();
+
+    setOrders((prevOrders) => {
+      const existingIndex = prevOrders.findIndex(
+        (order) => order.id === updatedOrder.id
+      );
+
+      if (existingIndex !== -1) {
+        // 기존 주문이 있으면 업데이트
+        return prevOrders.map((order) =>
+          order.id === updatedOrder.id ? updatedOrder : order
+        );
+      } else {
+        // 새로운 주문이면 추가
+        return [updatedOrder, ...prevOrders];
+      }
+    });
+  };
+
+  //  초기 데이터 로딩
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
-  // SSE를 통한 실시간 업데이트 감지
+  //  SSE를 통한 실시간 업데이트 감지
   useEffect(() => {
     const eventSource = new EventSource('/api/admin/orders/stream');
 
-    eventSource.onmessage = (event) => {
-      if (event.data === 'order_updated') {
-        fetchOrders(); // 주문 목록 다시 불러오기
+    eventSource.onmessage = async (event) => {
+      console.log('📡 SSE 이벤트 감지:', event.data);
+
+      const [eventType, orderId] = event.data.split(':');
+
+      if (eventType === 'order_paid' || eventType === 'order_status_updated') {
+        fetchUpdatedOrder(orderId); // 특정 주문만 다시 가져옴
       }
     };
 
@@ -72,9 +98,9 @@ export default function Orders() {
     };
 
     return () => eventSource.close();
-  }, [fetchOrders]);
+  }, []);
 
-  // 주문 상태 업데이트 API 호출
+  //  주문 상태 업데이트 API 호출
   const updateOrderStatus = async (
     orderId: string,
     newStatus: 'preparing' | 'ready' | 'served'
