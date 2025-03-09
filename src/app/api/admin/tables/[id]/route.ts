@@ -9,10 +9,9 @@ const supabase = createClient(
 // DELETE: 특정 테이블 삭제
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
-  console.log(id);
+  const id = (await params).id;
   const { error } = await supabase.from('tables').delete().eq('id', id);
 
   if (error)
