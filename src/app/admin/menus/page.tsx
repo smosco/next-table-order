@@ -10,11 +10,11 @@ export default function MenuPage() {
   const router = useRouter();
 
   const handleMenuAdded = () => {
-    router.push('/admin/menu');
+    router.push('/admin/menus');
   };
 
   return (
-    <div className='p-4'>
+    <div className='py-20 px-4'>
       <h2 className='text-2xl font-bold mb-4'>Menu Management</h2>
 
       <Tabs defaultValue='menu'>

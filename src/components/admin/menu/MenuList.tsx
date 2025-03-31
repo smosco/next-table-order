@@ -55,7 +55,7 @@ export default function MenuList() {
                     variant='outline'
                     size='sm'
                     className='mr-2'
-                    onClick={() => router.push(`/admin/menu/edit/${item.id}`)}
+                    onClick={() => router.push(`/admin/menus/edit/${item.id}`)}
                   >
                     Edit
                   </Button>

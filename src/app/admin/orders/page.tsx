@@ -126,96 +126,98 @@ export default function Orders() {
         </div>
       ) : (
         <AnimatePresence>
-          {orders.map((order) => (
-            <motion.div
-              key={order.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card className='bg-white shadow-md mb-6 overflow-hidden'>
-                <CardContent className='p-6'>
-                  <div className='flex justify-between items-center mb-4'>
-                    <h2 className='text-2xl font-bold'>
-                      Table {order.table_id}
-                    </h2>
-                    <Badge
-                      className={`text-sm px-3 py-1 rounded-full ${
-                        statusColors[order.status]
-                      }`}
-                    >
-                      {order.status.charAt(0).toUpperCase() +
-                        order.status.slice(1)}
-                    </Badge>
-                  </div>
-                  <div className='space-y-4'>
-                    {order.order_items.map((item) => (
-                      <motion.div
-                        key={item.id}
-                        className='flex flex-col space-y-2 bg-gray-50 p-3 rounded-lg'
+          {orders
+            .filter((order) => order.status !== 'served')
+            .map((order) => (
+              <motion.div
+                key={order.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className='bg-white shadow-md mb-6 overflow-hidden'>
+                  <CardContent className='p-6'>
+                    <div className='flex justify-between items-center mb-4'>
+                      <h2 className='text-2xl font-bold'>
+                        Table {order.table_id}
+                      </h2>
+                      <Badge
+                        className={`text-sm px-3 py-1 rounded-full ${
+                          statusColors[order.status]
+                        }`}
                       >
-                        <div className='flex items-center space-x-4'>
-                          {item.menus.image_url ? (
-                            <img
-                              src={item.menus.image_url}
-                              alt={item.menus.name}
-                              className='w-16 h-16 rounded-lg object-cover'
-                            />
-                          ) : (
-                            <div className='w-16 h-16 bg-gray-200 rounded-lg' />
-                          )}
-                          <div>
-                            <span className='text-lg font-medium'>
-                              {item.menus.name} x {item.quantity}
-                            </span>
+                        {order.status.charAt(0).toUpperCase() +
+                          order.status.slice(1)}
+                      </Badge>
+                    </div>
+                    <div className='space-y-4'>
+                      {order.order_items.map((item) => (
+                        <motion.div
+                          key={item.id}
+                          className='flex flex-col space-y-2 bg-gray-50 p-3 rounded-lg'
+                        >
+                          <div className='flex items-center space-x-4'>
+                            {item.menus.image_url ? (
+                              <img
+                                src={item.menus.image_url}
+                                alt={item.menus.name}
+                                className='w-16 h-16 rounded-lg object-cover'
+                              />
+                            ) : (
+                              <div className='w-16 h-16 bg-gray-200 rounded-lg' />
+                            )}
+                            <div>
+                              <span className='text-lg font-medium'>
+                                {item.menus.name} x {item.quantity}
+                              </span>
+                            </div>
                           </div>
-                        </div>
 
-                        {/* 옵션 정보 표시 */}
-                        {item.order_item_options.length > 0 && (
-                          <ul className='mt-1 text-sm text-toss-gray-700'>
-                            {item.order_item_options.map((opt, i) => (
-                              <li key={i} className='flex justify-between'>
-                                <span>- {opt.options.name}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
-                  <div className='mt-4 text-sm text-gray-600'>
-                    Order Time:{' '}
-                    {new Date(order.created_at).toLocaleTimeString()}
-                  </div>
-                  <div className='mt-4 flex space-x-2'>
-                    <Button
-                      onClick={() => updateOrderStatus(order.id, 'preparing')}
-                      disabled={order.status !== 'pending'}
-                      className='bg-toss-blue text-white hover:bg-toss-blue-dark transition-colors'
-                    >
-                      Start Cooking
-                    </Button>
-                    <Button
-                      onClick={() => updateOrderStatus(order.id, 'ready')}
-                      disabled={order.status !== 'preparing'}
-                      className='bg-toss-green-500 text-white hover:bg-toss-green-600 transition-colors'
-                    >
-                      Ready to Serve
-                    </Button>
-                    <Button
-                      onClick={() => updateOrderStatus(order.id, 'served')}
-                      disabled={order.status !== 'ready'}
-                      className='bg-toss-gray-500 text-white hover:bg-toss-gray-600 transition-colors'
-                    >
-                      Served
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                          {/* 옵션 정보 표시 */}
+                          {item.order_item_options.length > 0 && (
+                            <ul className='mt-1 text-sm text-toss-gray-700'>
+                              {item.order_item_options.map((opt, i) => (
+                                <li key={i} className='flex justify-between'>
+                                  <span>- {opt.options.name}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className='mt-4 text-sm text-gray-600'>
+                      Order Time:{' '}
+                      {new Date(order.created_at).toLocaleTimeString()}
+                    </div>
+                    <div className='mt-4 flex space-x-2'>
+                      <Button
+                        onClick={() => updateOrderStatus(order.id, 'preparing')}
+                        disabled={order.status !== 'pending'}
+                        className='bg-toss-blue text-white hover:bg-toss-blue-dark transition-colors'
+                      >
+                        Start Cooking
+                      </Button>
+                      <Button
+                        onClick={() => updateOrderStatus(order.id, 'ready')}
+                        disabled={order.status !== 'preparing'}
+                        className='bg-toss-green-500 text-white hover:bg-toss-green-600 transition-colors'
+                      >
+                        Ready to Serve
+                      </Button>
+                      <Button
+                        onClick={() => updateOrderStatus(order.id, 'served')}
+                        disabled={order.status !== 'ready'}
+                        className='bg-toss-gray-500 text-white hover:bg-toss-gray-600 transition-colors'
+                      >
+                        Served
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
         </AnimatePresence>
       )}
     </motion.div>

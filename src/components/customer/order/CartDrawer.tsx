@@ -29,7 +29,7 @@ export function CartDrawer() {
     if (storedTableId) {
       setTableId(storedTableId);
     }
-  }, []);
+  }, [tableId]);
 
   const handleOrderSuccess = (orderId: string) => {
     setOrderId(orderId);
