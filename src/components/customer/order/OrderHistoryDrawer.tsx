@@ -10,6 +10,8 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Clock, ClipboardList } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useFormatters } from '@/hooks/useFormatters';
 
 interface OrderOption {
   name: string;
@@ -40,6 +42,8 @@ export function OrderHistoryDrawer({
   setIsOpen: (open: boolean) => void;
   tableId: number;
 }) {
+  const t = useTranslations('OrderHistoryDrawer');
+  const { formatPriceLabel, formatDateTime } = useFormatters();
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
@@ -59,7 +63,7 @@ export function OrderHistoryDrawer({
       >
         <SheetHeader className='p-6 bg-white border-b border-toss-gray-200'>
           <SheetTitle className='text-2xl font-bold text-toss-gray-900'>
-            Order History
+            {t('title')}
           </SheetTitle>
         </SheetHeader>
         <ScrollArea className='flex-grow'>
@@ -79,10 +83,12 @@ export function OrderHistoryDrawer({
                     <div className='flex justify-between items-center mb-4'>
                       <div className='flex items-center text-sm text-toss-gray-600'>
                         <Clock size={16} className='mr-1' />
-                        {new Date(order.created_at).toLocaleString()}
+                        <span className='text-sm text-toss-gray-600'>
+                          {formatDateTime(order.created_at)}
+                        </span>
                       </div>
                       <span className='font-bold text-lg text-toss-blue-dark'>
-                        {order.total_price.toLocaleString()}₩
+                        {formatPriceLabel(order.total_price)}
                       </span>
                     </div>
 
@@ -116,7 +122,7 @@ export function OrderHistoryDrawer({
                                     {opt.name}
                                     {opt.price > 0 && (
                                       <span className='ml-1 text-toss-gray-700'>
-                                        (+{opt.price.toLocaleString()}₩)
+                                        ( +{formatPriceLabel(opt.price)} )
                                       </span>
                                     )}
                                   </li>
@@ -125,7 +131,7 @@ export function OrderHistoryDrawer({
                             )}
                           </div>
                           <span className='font-medium text-toss-gray-900 ml-2'>
-                            {item.totalPrice.toLocaleString()}₩
+                            {formatPriceLabel(item.totalPrice)}
                           </span>
                         </li>
                       ))}
@@ -141,8 +147,8 @@ export function OrderHistoryDrawer({
                 className='flex flex-col items-center justify-center h-full text-center text-toss-gray-600 p-6'
               >
                 <ClipboardList className='w-16 h-16 mb-4 text-toss-gray-300' />
-                <p className='text-lg font-medium'>No order history</p>
-                <p className='mt-2 text-sm'>Make your first order!</p>
+                <p className='text-lg font-medium'>{t('emptyTitle')}</p>
+                <p className='mt-2 text-sm'>{t('emptyDescription')}</p>
               </motion.div>
             )}
           </AnimatePresence>

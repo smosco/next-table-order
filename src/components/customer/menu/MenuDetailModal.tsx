@@ -16,6 +16,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
+import { useFormatters } from '@/hooks/useFormatters';
 
 interface Option {
   id: string;
@@ -47,6 +49,9 @@ export default function MenuDetailModal({
   menuId: string | null;
   onClose: () => void;
 }) {
+  const t = useTranslations('MenuDetailModal');
+  const { formatPriceLabel } = useFormatters();
+
   const queryClient = useQueryClient();
   const menu = queryClient.getQueryData<MenuItem>(['menu', menuId]); // Tanstack Query에서 데이터 가져오기
 
@@ -157,8 +162,9 @@ export default function MenuDetailModal({
                               htmlFor={option.id}
                               className='ml-2 text-sm text-toss-gray-700'
                             >
-                              {option.name}{' '}
-                              {option.price > 0 ? `(+${option.price}₩)` : ''}
+                              {option.name}
+                              {option.price > 0 &&
+                                `(+${formatPriceLabel(option.price)})`}
                             </label>
                           </div>
                         ))}
@@ -183,8 +189,9 @@ export default function MenuDetailModal({
                               htmlFor={option.id}
                               className='ml-2 text-sm text-toss-gray-700'
                             >
-                              {option.name}{' '}
-                              {option.price > 0 ? `(+${option.price}₩)` : ''}
+                              {option.name}
+                              {option.price > 0 &&
+                                `( +${formatPriceLabel(option.price)} )`}
                             </label>
                           </div>
                         ))}
@@ -217,14 +224,14 @@ export default function MenuDetailModal({
                     </Button>
                   </div>
                   <span className='text-lg font-bold text-toss-blue'>
-                    {(menu.price * quantity).toLocaleString()}₩
+                    {formatPriceLabel(menu.price * quantity)}
                   </span>
                 </div>
                 <Button
                   onClick={handleAddToCart}
                   className='w-full py-2 bg-toss-blue hover:bg-toss-blue-dark text-white'
                 >
-                  Add to Order
+                  {t('addToOrder')}
                 </Button>
               </div>
             </motion.div>
@@ -236,7 +243,7 @@ export default function MenuDetailModal({
               className='flex items-center justify-center h-64'
             >
               <p className='text-center text-lg text-toss-gray-600'>
-                Loading...
+                {t('loading')}
               </p>
             </motion.div>
           )}

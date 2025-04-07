@@ -3,5 +3,54 @@
     "title": "Who will be using this screen?",
     "admin": "Set up for staff use",
     "customer": "Set up for customer ordering"
+  },
+  "AdminLoginPage": {
+    "title": "Log in to manage your store",
+    "email": "Enter your email",
+    "password": "Enter your password",
+    "submit": "Log in",
+    "error": "Login failed. Please check your information"
+  },
+  "CustomerMenuPage": {
+    "loading": "Loading menu...",
+    "soldOutBadge": "Sold out"
+  },
+  "MenuDetailModal": {
+    "loading": "Loading menu...",
+    "addToOrder": "Add to order"
+  },
+  "CartDrawer": {
+    "title": "Your order",
+    "empty": "No items yet",
+    "total": "Total",
+    "needTable": "Please select a table"
+  },
+  "OrderButton": {
+    "submit": "Place order",
+    "loading": "Placing your order...",
+    "error": "Something went wrong. Please try again."
+  },
+  "PaymentModal": {
+    "title": "Complete your payment",
+    "total": "Total amount",
+    "card": "Card",
+    "cash": "Cash",
+    "submit": "Pay now",
+    "loading": "Processing payment...",
+    "success": "Payment completed!",
+    "error": "Sorry, payment failed. Please try again."
+  },
+  "OrderHistoryDrawer": {
+    "title": "Order history",
+    "emptyTitle": "No order history yet",
+    "emptyDescription": "Start your first order now"
+  },
+  "BottomBar": {
+    "orderNow": "Order now {total}",
+    "viewCart": "View cart",
+    "history": "Order history"
+  },
+  "TableInfo": {
+    "tableLabel": "Table {name}"
   }
 }

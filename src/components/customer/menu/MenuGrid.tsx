@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,8 @@ import Image from 'next/image';
 import MenuDetailModal from './MenuDetailModal';
 import { useCategoryStore } from '@/stores/useCategoryStore';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { useFormatters } from '@/hooks/useFormatters';
 
 interface Option {
   id: string;
@@ -42,13 +44,16 @@ export function MenuGrid() {
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [selectedMenuId, setSelectedMenuId] = useState<string | null>(null);
 
+  const t = useTranslations('CustomerMenuPage');
+  const { formatPriceLabel } = useFormatters();
+
   const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
     queryKey: ['menus'],
     queryFn: async () => {
       const response = await fetch('/api/public/menus');
       return response.json();
     },
-    staleTime: 1000 * 60 * 60, // 1시간 동안 캐시 유지
+    staleTime: 1000 * 60 * 60,
   });
 
   useEffect(() => {
@@ -96,7 +101,7 @@ export function MenuGrid() {
         className='flex-1 overflow-y-auto px-6 py-8 space-y-12'
       >
         {isLoading ? (
-          <p>Loading...</p>
+          <p className='text-center text-toss-gray-600'>{t('loading')}</p>
         ) : (
           Object.entries(groupedMenus).map(([categoryId, { name, items }]) => (
             <div
@@ -138,7 +143,7 @@ export function MenuGrid() {
                         />
                         {item.status === 'sold_out' && (
                           <div className='absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-xs font-bold rounded'>
-                            sold_out
+                            {t('soldOutBadge')}
                           </div>
                         )}
                       </div>
@@ -153,7 +158,7 @@ export function MenuGrid() {
                           variant='secondary'
                           className='text-lg bg-toss-blue-light text-toss-blue'
                         >
-                          {item.price.toLocaleString()} ₩
+                          {formatPriceLabel(item.price)}
                         </Badge>
                       </CardContent>
                     </Card>

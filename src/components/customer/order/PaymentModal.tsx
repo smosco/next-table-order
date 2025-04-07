@@ -9,6 +9,8 @@ import {
   DialogTitle,
   DialogHeader,
 } from '@/components/ui/dialog';
+import { useTranslations } from 'next-intl';
+import { useFormatters } from '@/hooks/useFormatters';
 
 export function PaymentModal({
   orderId,
@@ -21,8 +23,10 @@ export function PaymentModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations('PaymentModal');
+  const { formatPriceLabel } = useFormatters();
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cash'>('card');
   const [error, setError] = useState<string | null>(null);
   const { clearCart } = useCart();
 
@@ -40,14 +44,12 @@ export function PaymentModal({
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
 
-      alert('Payment successful!');
-
-      // 주문 완료 후 장바구니 비우기
+      alert(t('success'));
       clearCart();
       onClose();
     } catch (error: any) {
       console.error('Payment error:', error);
-      setError(error.message);
+      setError(t('error'));
     } finally {
       setLoading(false);
     }
@@ -57,26 +59,36 @@ export function PaymentModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Complete Payment</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
         </DialogHeader>
-        <p>Total Amount: {totalPrice.toLocaleString()} ₩</p>
-        <div className='flex gap-2'>
+
+        <p className='text-base text-toss-gray-900 font-semibold mb-4'>
+          {t('total')}: {formatPriceLabel(totalPrice)}
+        </p>
+
+        <div className='flex gap-2 mb-4'>
           <Button
             variant={paymentMethod === 'card' ? 'default' : 'outline'}
             onClick={() => setPaymentMethod('card')}
           >
-            Card
+            {t('card')}
           </Button>
           <Button
             variant={paymentMethod === 'cash' ? 'default' : 'outline'}
             onClick={() => setPaymentMethod('cash')}
           >
-            Cash
+            {t('cash')}
           </Button>
         </div>
-        {error && <p className='text-red-500'>{error}</p>}
-        <Button onClick={handlePayment} disabled={loading}>
-          {loading ? 'Processing...' : 'Pay Now'}
+
+        {error && <p className='text-red-500 text-sm'>{error}</p>}
+
+        <Button
+          onClick={handlePayment}
+          disabled={loading}
+          className='mt-2 w-full'
+        >
+          {loading ? t('loading') : t('submit')}
         </Button>
       </DialogContent>
     </Dialog>

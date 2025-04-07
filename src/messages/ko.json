@@ -3,5 +3,54 @@
     "title": "이 기기는 누구를 위한 화면인가요?",
     "admin": "사장님용으로 사용할게요",
     "customer": "손님이 직접 주문하게 할게요"
+  },
+  "AdminLoginPage": {
+    "title": "관리자 로그인",
+    "email": "이메일 입력",
+    "password": "비밀번호 입력",
+    "submit": "로그인",
+    "error": "로그인에 실패했어요. 정보를 다시 확인해주세요."
+  },
+  "CustomerMenuPage": {
+    "loading": "메뉴를 불러오는 중이에요",
+    "soldOutBadge": "품절"
+  },
+  "MenuDetailModal": {
+    "loading": "메뉴를 불러오는 중이에요",
+    "addToOrder": "주문에 추가하기"
+  },
+  "CartDrawer": {
+    "title": "장바구니",
+    "empty": "아직 담은 메뉴가 없어요",
+    "total": "총 결제금액",
+    "needTable": "테이블을 먼저 선택해주세요"
+  },
+  "OrderButton": {
+    "submit": "주문하기",
+    "loading": "주문 처리 중...",
+    "error": "죄송해요, 주문에 실패했어요."
+  },
+  "PaymentModal": {
+    "title": "결제하기",
+    "total": "총 결제금액",
+    "card": "카드",
+    "cash": "현금",
+    "submit": "결제하기",
+    "loading": "결제 처리 중이에요",
+    "success": "결제가 완료되었어요!",
+    "error": "죄송해요, 결제에 실패했어요."
+  },
+  "OrderHistoryDrawer": {
+    "title": "주문 내역",
+    "emptyTitle": "아직 주문한 내역이 없어요",
+    "emptyDescription": "첫 주문을 시작해보세요"
+  },
+  "BottomBar": {
+    "orderNow": "주문하기 {total}",
+    "viewCart": "장바구니 보기",
+    "history": "주문 내역"
+  },
+  "TableInfo": {
+    "tableLabel": "테이블 {name}"
   }
 }

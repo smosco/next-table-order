@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 
 export function OrderButton({
   tableId,
@@ -12,9 +13,9 @@ export function OrderButton({
   cartItems: { menuId: string; quantity: number; price: number }[];
   onOrderSuccess: (orderId: string) => void;
 }) {
+  const t = useTranslations('OrderButton');
   const [loading, setLoading] = useState(false);
 
-  // totalPrice 계산 (각 아이템 가격 * 수량 합산)
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
@@ -35,7 +36,7 @@ export function OrderButton({
       onOrderSuccess(data.orderId);
     } catch (error: any) {
       console.error('Order error:', error);
-      alert('Failed to create order');
+      alert(t('error'));
     } finally {
       setLoading(false);
     }
@@ -43,7 +44,7 @@ export function OrderButton({
 
   return (
     <Button onClick={handleOrder} disabled={loading || cartItems.length === 0}>
-      {loading ? 'Processing...' : 'Place Order'}
+      {loading ? t('loading') : t('submit')}
     </Button>
   );
 }

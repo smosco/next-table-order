@@ -9,6 +9,8 @@ import { Minus, Plus, Trash2 } from 'lucide-react';
 import { OrderButton } from './OrderButton';
 import { PaymentModal } from './PaymentModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { useFormatters } from '@/hooks/useFormatters';
 
 export function CartDrawer() {
   const {
@@ -22,6 +24,9 @@ export function CartDrawer() {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [tableId, setTableId] = useState<string | null>(null);
+
+  const t = useTranslations('CartDrawer');
+  const { formatPriceLabel } = useFormatters();
 
   useEffect(() => {
     // 로컬스토리지에서 테이블 ID 가져오기
@@ -45,7 +50,7 @@ export function CartDrawer() {
         >
           <div className='flex flex-col h-full'>
             <h2 className='font-semibold text-2xl mb-6 text-toss-gray-900'>
-              Your Cart
+              {t('title')}
             </h2>
 
             <ScrollArea className='flex-1 -mx-6 px-6'>
@@ -57,7 +62,7 @@ export function CartDrawer() {
                     exit={{ opacity: 0 }}
                     className='text-center text-toss-gray-600 text-lg py-8'
                   >
-                    Your cart is empty
+                    {t('empty')}
                   </motion.p>
                 ) : (
                   <motion.div layout className='space-y-6'>
@@ -87,9 +92,8 @@ export function CartDrawer() {
                                 {item.name}
                               </h3>
                               <p className='text-base text-toss-gray-700'>
-                                {itemTotalPrice.toLocaleString()} ₩
+                                {formatPriceLabel(itemTotalPrice)}
                               </p>
-
                               {item.options && item.options.length > 0 && (
                                 <div className='mt-2 text-sm text-toss-gray-600'>
                                   {item.options.map((opt) => (
@@ -100,7 +104,7 @@ export function CartDrawer() {
                                       <span>- {opt.optionName}</span>
                                       {opt.price > 0 && (
                                         <span className='ml-2 text-toss-gray-700'>
-                                          (+{opt.price.toLocaleString()}₩)
+                                          ( +{formatPriceLabel(opt.price)} )
                                         </span>
                                       )}
                                     </p>
@@ -162,10 +166,10 @@ export function CartDrawer() {
             >
               <div className='flex justify-between mb-6'>
                 <span className='font-semibold text-xl text-toss-gray-900'>
-                  Total Price
+                  {t('total')}
                 </span>
                 <span className='font-semibold text-xl text-toss-blue'>
-                  {total.toLocaleString()} ₩
+                  {formatPriceLabel(total)}
                 </span>
               </div>
 
@@ -178,7 +182,7 @@ export function CartDrawer() {
                 />
               ) : (
                 <p className='text-center text-red-500 font-medium'>
-                  Please select table first
+                  {t('needTable')}
                 </p>
               )}
             </motion.div>

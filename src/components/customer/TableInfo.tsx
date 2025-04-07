@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, ChevronDown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 const languages = [
   { code: 'en', name: 'English' },
@@ -10,6 +11,7 @@ const languages = [
 ];
 
 export function TableInfo({ tableName }: { tableName: string }) {
+  const t = useTranslations('TableInfo');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
 
@@ -62,7 +64,10 @@ export function TableInfo({ tableName }: { tableName: string }) {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <span className='text-2xl font-bold text-toss-blue'>{tableName}</span>
+        <span className='text-2xl font-bold text-toss-blue'>
+          {/* TODO(@smosco): tableName을 보여줄 필요 없음 */}
+          {t('tableLabel', { name: tableName })}
+        </span>
       </motion.div>
     </div>
   );

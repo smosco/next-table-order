@@ -6,8 +6,12 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, History } from 'lucide-react';
 import { OrderHistoryDrawer } from './order/OrderHistoryDrawer';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { useFormatters } from '@/hooks/useFormatters';
 
 export function BottomBar() {
+  const t = useTranslations('BottomBar');
+  const { formatPriceLabel } = useFormatters();
   const { total, setIsCartOpen } = useCart();
   const [isOrderHistoryOpen, setIsOrderHistoryOpen] = useState(false);
 
@@ -25,14 +29,16 @@ export function BottomBar() {
             onClick={() => setIsCartOpen(true)}
           >
             <ShoppingCart className='mr-2 w-5 h-5' />
-            {total > 0 ? `Order Now ${total.toLocaleString()} ₩` : 'View Cart'}
+            {total > 0
+              ? t('orderNow', { total: formatPriceLabel(total) })
+              : t('viewCart')}
           </Button>
           <Button
             className='bg-toss-gray-200 hover:bg-toss-gray-300 text-toss-gray-700 font-medium py-4 px-6 rounded-xl transition-all duration-200 ease-in-out'
             onClick={() => setIsOrderHistoryOpen(true)}
           >
             <History className='mr-2 w-5 h-5' />
-            Order History
+            {t('history')}
           </Button>
         </div>
       </motion.div>
@@ -41,6 +47,7 @@ export function BottomBar() {
         <OrderHistoryDrawer
           isOpen={isOrderHistoryOpen}
           setIsOpen={setIsOrderHistoryOpen}
+          //TODO(@smosco): 실제 tableId 가져오는 훅 필요
           tableId={1}
         />
       )}
