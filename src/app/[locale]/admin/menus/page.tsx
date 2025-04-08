@@ -1,43 +1,46 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useState } from 'react';
 import MenuList from '@/components/admin/menu/MenuList';
-import CategoryManager from '@/components/admin/menu/CategoryManager';
-import MenuForm from '@/components/admin/menu/MenuForm';
-import { useRouter } from 'next/navigation';
+import MenuFormModal from '@/components/admin/menu/MenuFormModal'; // 주석 해제
+import type { MenuItem } from '@/types/schema';
+import { Button } from '@/components/ui/button';
 
 export default function MenuPage() {
-  const router = useRouter();
-  const t = useTranslations('AdminMenuPage');
+  const [showMenuModal, setShowMenuModal] = useState(false);
+  const [editingMenu, setEditingMenu] = useState<MenuItem | null>(null);
 
-  const handleMenuAdded = () => {
-    router.push('/admin/menus');
+  const handleAddMenu = () => {
+    setEditingMenu(null);
+    setShowMenuModal(true);
   };
 
   return (
     <div className='py-20 px-4'>
-      <h2 className='text-2xl font-bold mb-4'>{t('title')}</h2>
+      <div className='flex justify-between items-center mb-6'>
+        <h2 className='text-2xl font-bold'>상품 관리</h2>
+        <div className='flex gap-2'>
+          {/* 카테고리/옵션 모달은 이후 연결 */}
+          <Button onClick={handleAddMenu}>상품 추가</Button>
+        </div>
+      </div>
 
-      <Tabs defaultValue='menu'>
-        <TabsList className='mb-4'>
-          <TabsTrigger value='menu'>{t('tabs.menu')}</TabsTrigger>
-          <TabsTrigger value='categories'>{t('tabs.categories')}</TabsTrigger>
-          <TabsTrigger value='add'>{t('tabs.add')}</TabsTrigger>
-        </TabsList>
+      <MenuList
+        onEditMenu={(menu) => {
+          setEditingMenu(menu);
+          setShowMenuModal(true);
+        }}
+      />
 
-        <TabsContent value='menu'>
-          <MenuList />
-        </TabsContent>
-
-        <TabsContent value='categories'>
-          <CategoryManager />
-        </TabsContent>
-
-        <TabsContent value='add'>
-          <MenuForm onMenuUpdated={handleMenuAdded} />
-        </TabsContent>
-      </Tabs>
+      <MenuFormModal
+        open={showMenuModal}
+        onClose={() => setShowMenuModal(false)}
+        menuToEdit={editingMenu}
+        onMenuUpdated={() => {
+          setShowMenuModal(false);
+          // 메뉴 리스트 갱신 로직은 MenuList 내부에서 처리되거나 부모에서 상태로 연결 가능
+        }}
+      />
     </div>
   );
 }
