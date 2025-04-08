@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import MenuList from '@/components/admin/menu/MenuList';
 import CategoryManager from '@/components/admin/menu/CategoryManager';
@@ -8,6 +9,7 @@ import { useRouter } from 'next/navigation';
 
 export default function MenuPage() {
   const router = useRouter();
+  const t = useTranslations('AdminMenuPage');
 
   const handleMenuAdded = () => {
     router.push('/admin/menus');
@@ -15,13 +17,13 @@ export default function MenuPage() {
 
   return (
     <div className='py-20 px-4'>
-      <h2 className='text-2xl font-bold mb-4'>Menu Management</h2>
+      <h2 className='text-2xl font-bold mb-4'>{t('title')}</h2>
 
       <Tabs defaultValue='menu'>
         <TabsList className='mb-4'>
-          <TabsTrigger value='menu'>Menus</TabsTrigger>
-          <TabsTrigger value='categories'>Categories</TabsTrigger>
-          <TabsTrigger value='add'>Add Menu</TabsTrigger>
+          <TabsTrigger value='menu'>{t('tabs.menu')}</TabsTrigger>
+          <TabsTrigger value='categories'>{t('tabs.categories')}</TabsTrigger>
+          <TabsTrigger value='add'>{t('tabs.add')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value='menu'>
@@ -33,7 +35,6 @@ export default function MenuPage() {
         </TabsContent>
 
         <TabsContent value='add'>
-          {/* 추가 모드에서는 menuToEdit 없이 사용 */}
           <MenuForm onMenuUpdated={handleMenuAdded} />
         </TabsContent>
       </Tabs>

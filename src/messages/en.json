@@ -52,5 +52,115 @@
   },
   "TableInfo": {
     "tableLabel": "Table {name}"
+  },
+  "AdminSidebar": {
+    "brand": "Restaurant POS",
+    "dashboard": "Sales Report",
+    "orders": "Orders Status",
+    "payments": "Orders by Table",
+    "analytics": "Payment History",
+    "menus": "Manage Menus",
+    "tables": "Manage Tables"
+  },
+  "AdminSalesReportPage": {
+    "title": "Sales Report"
+  },
+  "AdminOrdersPage": {
+    "title": "Order Status",
+    "table": "Table {number}",
+    "status": {
+      "pending": "Pending",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "served": "Served"
+    },
+    "timeLabel": "Order Time: {time}",
+    "buttons": {
+      "startCooking": "Start Cooking",
+      "readyToServe": "Ready to Serve",
+      "served": "Served"
+    }
+  },
+  "AdminMenuPage": {
+    "title": "Menu Settings",
+    "tabs": {
+      "menu": "Menu List",
+      "categories": "Manage Categories",
+      "add": "Add New Menu"
+    }
+  },
+  "AdminMenuForm": {
+    "title": {
+      "add": "Add New Menu Item",
+      "edit": "Edit Menu Item"
+    },
+    "form": {
+      "category": "Category",
+      "categoryPlaceholder": "Select a category",
+      "image": "Image",
+      "imagePlaceholder": "Click to upload an image",
+      "name": "Menu name",
+      "description": "Description",
+      "price": "Price",
+      "submit": "Add Menu",
+      "update": "Update Menu",
+      "processing": "Saving..."
+    },
+    "toast": {
+      "successTitle": "Saved successfully",
+      "addSuccess": "Menu has been added.",
+      "updateSuccess": "Menu has been updated.",
+      "errorTitle": "Something went wrong",
+      "fetchCategoryFail": "Unable to load categories. Please try again later.",
+      "defaultError": "Unexpected error"
+    }
+  },
+  "AdminOrdersByTable": {
+    "title": "Order Overview",
+    "viewOrder": "View Details",
+    "closeTable": "Close Table",
+    "noOrder": "No active orders",
+    "detailsTitle": "Order Details",
+    "noItems": "No items found"
+  },
+  "PaymentHistoryPage": {
+    "title": "Payment History Data",
+    "loading": "Loading sales data...",
+    "error": "Failed to fetch sales data"
+  },
+  "PopularItems": {
+    "title": "Popular Items ({rangeLabel})",
+    "menu": "Menu Item",
+    "quantity": "Sold Quantity",
+    "revenue": "Revenue",
+    "sold": "{count} sold",
+    "ranges": {
+      "today": "Today",
+      "week": "This week",
+      "month": "This month"
+    }
+  },
+  "SalesFilter": {
+    "selectRange": "Select Range",
+    "ranges": {
+      "today": "Today",
+      "week": "This Week",
+      "month": "This Month",
+      "year": "This Year"
+    }
+  },
+  "SalesSummary": {
+    "totalRevenue": "Total Revenue",
+    "averageDailyRevenue": "Average Daily Revenue",
+    "totalItemsSold": "Total Items Sold"
+  },
+  "SalesChart": {
+    "title": "Sales Trend ({range})"
+  },
+  "RangeLabels": {
+    "today": "Today",
+    "week": "This Week",
+    "month": "This Month",
+    "year": "This Year"
   }
 }

@@ -12,14 +12,23 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { useFormatters } from '@/hooks/useFormatters';
 
 type DailySales = {
   date: string;
-  totalRevenue: number;
+  total_revenue: number;
 };
 
-export default function SalesChart({ range }: { range: string }) {
+interface SalesChartProps {
+  range: string;
+}
+
+export default function SalesChart({ range }: SalesChartProps) {
   const [data, setData] = useState<DailySales[]>([]);
+  const t = useTranslations('SalesChart');
+  const rangeLabel = useTranslations('RangeLabels')(range);
+  const { formatPriceLabel, formatShortDate } = useFormatters();
 
   useEffect(() => {
     async function fetchSales() {
@@ -39,14 +48,18 @@ export default function SalesChart({ range }: { range: string }) {
       <Card className='bg-white border-toss-gray-200'>
         <CardHeader>
           <CardTitle className='text-lg font-semibold text-toss-gray-900'>
-            Sales Trend ({range})
+            {t('title', { range: rangeLabel })}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width='100%' height={300}>
             <LineChart data={data}>
               <CartesianGrid strokeDasharray='3 3' stroke='#E5E8EB' />
-              <XAxis dataKey='date' stroke='#6B7684' />
+              <XAxis
+                dataKey='date'
+                stroke='#6B7684'
+                tickFormatter={formatShortDate}
+              />
               <YAxis stroke='#6B7684' />
               <Tooltip
                 contentStyle={{
@@ -54,6 +67,8 @@ export default function SalesChart({ range }: { range: string }) {
                   border: '1px solid #E5E8EB',
                   borderRadius: '8px',
                 }}
+                formatter={(value: number) => formatPriceLabel(value)}
+                labelFormatter={(label) => formatShortDate(label)}
               />
               <Line
                 type='monotone'

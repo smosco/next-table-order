@@ -9,13 +9,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
-const ranges = [
-  { label: 'Today', value: 'today' },
-  { label: 'Last 7 Days', value: 'week' },
-  { label: 'Last 30 Days', value: 'month' },
-  { label: 'This Year', value: 'year' },
-];
+const ranges = ['today', 'week', 'month', 'year'] as const;
 
 export function SalesFilter({
   range,
@@ -24,6 +20,8 @@ export function SalesFilter({
   range: string;
   onChange: (range: string) => void;
 }) {
+  const t = useTranslations('SalesFilter');
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -32,19 +30,19 @@ export function SalesFilter({
             variant='outline'
             className='bg-white text-toss-gray-700 border-toss-gray-200'
           >
-            {ranges.find((r) => r.value === range)?.label || 'Select Range'}
+            {t(`ranges.${range}`) || t('selectRange')}
             <ChevronDown className='ml-2 h-4 w-4 text-toss-gray-500' />
           </Button>
         </motion.div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='bg-white border border-toss-gray-200 rounded-lg shadow-lg'>
-        {ranges.map((r) => (
+        {ranges.map((key) => (
           <DropdownMenuItem
-            key={r.value}
-            onClick={() => onChange(r.value)}
+            key={key}
+            onClick={() => onChange(key)}
             className='text-toss-gray-700 hover:bg-toss-blue-light hover:text-toss-blue transition-colors'
           >
-            {r.label}
+            {t(`ranges.${key}`)}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

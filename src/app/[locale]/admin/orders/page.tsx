@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useFormatters } from '@/hooks/useFormatters';
 
 type OrderOption = {
   name: string;
@@ -40,10 +42,12 @@ const statusColors = {
 };
 
 export default function Orders() {
+  const t = useTranslations('AdminOrdersPage');
+  const { formatDateTime } = useFormatters();
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  //  전체 주문 목록 가져오는 API (초기 로딩)
   const fetchOrders = useCallback(async () => {
     const response = await fetch('/api/admin/orders');
     const data = await response.json();
@@ -51,7 +55,6 @@ export default function Orders() {
     setIsLoading(false);
   }, []);
 
-  //  특정 주문 ID만 가져와 업데이트하는 API
   const fetchUpdatedOrder = async (orderId: string) => {
     const response = await fetch(`/api/admin/orders/${orderId}`);
     const updatedOrder = await response.json();
@@ -62,33 +65,27 @@ export default function Orders() {
       );
 
       if (existingIndex !== -1) {
-        // 기존 주문이 있으면 업데이트
         return prevOrders.map((order) =>
           order.id === updatedOrder.id ? updatedOrder : order
         );
       } else {
-        // 새로운 주문이면 추가
         return [updatedOrder, ...prevOrders];
       }
     });
   };
 
-  //  초기 데이터 로딩
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
-  //  SSE를 통한 실시간 업데이트 감지
   useEffect(() => {
     const eventSource = new EventSource('/api/admin/orders/stream');
 
     eventSource.onmessage = async (event) => {
-      console.log('📡 SSE 이벤트 감지:', event.data);
-
       const [eventType, orderId] = event.data.split(':');
 
       if (eventType === 'order_paid' || eventType === 'order_status_updated') {
-        fetchUpdatedOrder(orderId); // 특정 주문만 다시 가져옴
+        fetchUpdatedOrder(orderId);
       }
     };
 
@@ -100,7 +97,6 @@ export default function Orders() {
     return () => eventSource.close();
   }, []);
 
-  //  주문 상태 업데이트 API 호출
   const updateOrderStatus = async (
     orderId: string,
     newStatus: 'preparing' | 'ready' | 'served'
@@ -119,7 +115,8 @@ export default function Orders() {
       transition={{ duration: 0.5 }}
       className='p-6 bg-gray-100 min-h-screen'
     >
-      <h1 className='text-3xl font-bold mb-6'>Real-time Order Management</h1>
+      <h1 className='text-3xl font-bold mb-6'>{t('title')}</h1>
+
       {isLoading ? (
         <div className='flex justify-center items-center h-64'>
           <Loader2 className='w-8 h-8 text-blue-500 animate-spin' />
@@ -140,15 +137,14 @@ export default function Orders() {
                   <CardContent className='p-6'>
                     <div className='flex justify-between items-center mb-4'>
                       <h2 className='text-2xl font-bold'>
-                        Table {order.table_id}
+                        {t('table', { number: order.table_id })}
                       </h2>
                       <Badge
                         className={`text-sm px-3 py-1 rounded-full ${
                           statusColors[order.status]
                         }`}
                       >
-                        {order.status.charAt(0).toUpperCase() +
-                          order.status.slice(1)}
+                        {t(`status.${order.status}`)}
                       </Badge>
                     </div>
                     <div className='space-y-4'>
@@ -173,8 +169,6 @@ export default function Orders() {
                               </span>
                             </div>
                           </div>
-
-                          {/* 옵션 정보 표시 */}
                           {item.order_item_options.length > 0 && (
                             <ul className='mt-1 text-sm text-toss-gray-700'>
                               {item.order_item_options.map((opt, i) => (
@@ -188,8 +182,9 @@ export default function Orders() {
                       ))}
                     </div>
                     <div className='mt-4 text-sm text-gray-600'>
-                      Order Time:{' '}
-                      {new Date(order.created_at).toLocaleTimeString()}
+                      {t('timeLabel', {
+                        time: formatDateTime(order.created_at),
+                      })}
                     </div>
                     <div className='mt-4 flex space-x-2'>
                       <Button
@@ -197,21 +192,21 @@ export default function Orders() {
                         disabled={order.status !== 'pending'}
                         className='bg-toss-blue text-white hover:bg-toss-blue-dark transition-colors'
                       >
-                        Start Cooking
+                        {t('buttons.startCooking')}
                       </Button>
                       <Button
                         onClick={() => updateOrderStatus(order.id, 'ready')}
                         disabled={order.status !== 'preparing'}
                         className='bg-toss-green-500 text-white hover:bg-toss-green-600 transition-colors'
                       >
-                        Ready to Serve
+                        {t('buttons.readyToServe')}
                       </Button>
                       <Button
                         onClick={() => updateOrderStatus(order.id, 'served')}
                         disabled={order.status !== 'ready'}
                         className='bg-toss-gray-500 text-white hover:bg-toss-gray-600 transition-colors'
                       >
-                        Served
+                        {t('buttons.served')}
                       </Button>
                     </div>
                   </CardContent>

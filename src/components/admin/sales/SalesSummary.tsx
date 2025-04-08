@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion, Variants } from 'framer-motion';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useFormatters } from '@/hooks/useFormatters';
 
 type SalesSummary = {
   total_revenue: number;
@@ -11,8 +12,9 @@ type SalesSummary = {
   total_items_sold: number;
 };
 
-export default function SalesSummary({ range = 'week' }) {
+export default function SalesSummary({ range = 'week' }: { range: string }) {
   const [summary, setSummary] = useState<SalesSummary | null>(null);
+  const t = useTranslations('SalesSummary');
 
   useEffect(() => {
     async function fetchData() {
@@ -42,21 +44,20 @@ export default function SalesSummary({ range = 'week' }) {
       }}
     >
       <SummaryCard
-        title='Total Revenue'
+        title={t('totalRevenue')}
         value={summary?.total_revenue || 0}
-        range={range}
         variants={cardVariants}
+        isCurrency
       />
       <SummaryCard
-        title='Average Daily Revenue'
+        title={t('averageDailyRevenue')}
         value={summary?.average_daily_revenue || 0}
-        range={range}
         variants={cardVariants}
+        isCurrency
       />
       <SummaryCard
-        title='Total Items Sold'
+        title={t('totalItemsSold')}
         value={summary?.total_items_sold || 0}
-        range={range}
         variants={cardVariants}
         isCurrency={false}
       />
@@ -67,16 +68,16 @@ export default function SalesSummary({ range = 'week' }) {
 function SummaryCard({
   title,
   value,
-  range,
   variants,
   isCurrency = true,
 }: {
   title: string;
   value: number;
-  range: string;
   variants: Variants;
   isCurrency?: boolean;
 }) {
+  const { formatPriceLabel, formatQuantityLabel } = useFormatters();
+
   return (
     <motion.div variants={variants}>
       <Card className='bg-white border-toss-gray-200'>
@@ -87,9 +88,7 @@ function SummaryCard({
         </CardHeader>
         <CardContent>
           <div className='text-2xl font-bold text-toss-gray-900'>
-            {isCurrency
-              ? `${value.toLocaleString()} ₩`
-              : value.toLocaleString()}
+            {isCurrency ? formatPriceLabel(value) : formatQuantityLabel(value)}
           </div>
         </CardContent>
       </Card>

@@ -13,6 +13,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, ChevronRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useFormatters } from '@/hooks/useFormatters';
 
 interface Table {
   id: number;
@@ -48,6 +50,9 @@ const tables: Table[] = [
 ];
 
 export default function AdminOrders() {
+  const t = useTranslations('AdminOrdersByTable');
+  const { formatPriceLabel } = useFormatters();
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -65,7 +70,6 @@ export default function AdminOrders() {
       const data = await res.json();
       setOrders(data.orders);
     } catch (err) {
-      console.error('Failed to fetch orders:', err);
       toast({
         title: 'Error',
         description: 'Failed to fetch orders',
@@ -87,7 +91,7 @@ export default function AdminOrders() {
         body: JSON.stringify({ tableId }),
       });
 
-      if (!res.ok) throw new Error('Failed to close table');
+      if (!res.ok) throw new Error();
 
       toast({
         title: 'Success',
@@ -95,8 +99,7 @@ export default function AdminOrders() {
       });
 
       fetchOrders();
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to close table',
@@ -107,7 +110,7 @@ export default function AdminOrders() {
 
   return (
     <div className='p-6 bg-gray-50 min-h-screen'>
-      <h1 className='text-3xl font-bold mb-6 text-gray-900'>Admin Orders</h1>
+      <h1 className='text-3xl font-bold mb-6 text-gray-900'>{t('title')}</h1>
       {isLoading ? (
         <div className='flex justify-center items-center h-64'>
           <Loader2 className='w-8 h-8 text-blue-500 animate-spin' />
@@ -137,7 +140,7 @@ export default function AdminOrders() {
                           className='space-y-2'
                         >
                           <p className='font-medium text-blue-600 text-lg'>
-                            ${order.total_price.toFixed(2)}
+                            {formatPriceLabel(order.total_price)}
                           </p>
                           <Button
                             className='w-full justify-between bg-white text-blue-600 border border-blue-600 hover:bg-blue-50'
@@ -146,18 +149,18 @@ export default function AdminOrders() {
                               setIsSheetOpen(true);
                             }}
                           >
-                            View Order
+                            {t('viewOrder')}
                             <ChevronRight size={16} />
                           </Button>
                           <Button
                             className='w-full bg-red-500 hover:bg-red-600 text-white'
                             onClick={() => closeTable(table.id)}
                           >
-                            Close Table
+                            {t('closeTable')}
                           </Button>
                         </motion.div>
                       ) : (
-                        <p className='text-gray-500'>No active orders</p>
+                        <p className='text-gray-500'>{t('noOrder')}</p>
                       )}
                     </CardContent>
                   </Card>
@@ -172,7 +175,7 @@ export default function AdminOrders() {
         <SheetContent side='right' className='w-full sm:max-w-md p-0'>
           <SheetHeader className='p-6 border-b border-gray-200'>
             <SheetTitle className='text-2xl font-bold text-gray-900'>
-              Order Details
+              {t('detailsTitle')}
             </SheetTitle>
           </SheetHeader>
           <ScrollArea className='h-[calc(100vh-180px)] px-6'>
@@ -187,7 +190,7 @@ export default function AdminOrders() {
                   {tables.find((t) => t.id === selectedOrder.table_id)?.name}
                 </h2>
                 <p className='mb-6 font-bold text-blue-600 text-2xl'>
-                  ${selectedOrder.total_price.toFixed(2)}
+                  {formatPriceLabel(selectedOrder.total_price)}
                 </p>
 
                 {selectedOrder.items.length > 0 ? (
@@ -209,7 +212,7 @@ export default function AdminOrders() {
                           </span>
                         </div>
                         <span className='font-medium text-gray-900'>
-                          ${item.totalPrice.toFixed(2)}
+                          {formatPriceLabel(item.totalPrice)}
                         </span>
                       </div>
 
@@ -224,7 +227,7 @@ export default function AdminOrders() {
                                 - {opt.name}
                               </span>
                               <span className='text-gray-900'>
-                                +${opt.price.toFixed(2)}
+                                +{formatPriceLabel(opt.price)}
                               </span>
                             </li>
                           ))}
@@ -233,7 +236,7 @@ export default function AdminOrders() {
                     </motion.div>
                   ))
                 ) : (
-                  <p className='text-gray-500'>No items found</p>
+                  <p className='text-gray-500'>{t('noItems')}</p>
                 )}
               </motion.div>
             )}

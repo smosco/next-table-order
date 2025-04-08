@@ -23,8 +23,25 @@ export function useFormatters() {
       minute: '2-digit',
     }).format(new Date(value));
 
+  const formatQuantityLabel = (amount: number) => {
+    const suffix = locale === 'ko' ? ' 개' : ' EA';
+    return `${amount.toLocaleString(locale)}${suffix}`;
+  };
+
+  // 짧은 날짜용 (차트 축 등)
+  const formatShortDate = (value: string | Date) =>
+    new Intl.DateTimeFormat(locale, {
+      month: '2-digit',
+      day: '2-digit',
+    })
+      .format(new Date(value))
+      .replace(/\./g, '')
+      .trim(); // "04.08" → "04 08" → "04.08" 으로 직접 포맷 조정도 가능
+
   return {
     formatPriceLabel,
     formatDateTime,
+    formatQuantityLabel,
+    formatShortDate,
   };
 }

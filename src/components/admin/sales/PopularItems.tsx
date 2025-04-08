@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { useFormatters } from '@/hooks/useFormatters';
 
 type PopularMenuItem = {
   menu_id: string;
@@ -20,6 +22,10 @@ type PopularMenuItem = {
 };
 
 export function PopularItems({ range }: { range: string }) {
+  const t = useTranslations('PopularItems');
+  const rangeLabel = t(`ranges.${range}`);
+  const { formatPriceLabel } = useFormatters();
+
   const [items, setItems] = useState<PopularMenuItem[]>([]);
 
   useEffect(() => {
@@ -40,18 +46,22 @@ export function PopularItems({ range }: { range: string }) {
       <Card className='bg-white border-toss-gray-200'>
         <CardHeader>
           <CardTitle className='text-lg font-semibold text-toss-gray-900'>
-            Popular Items ({range})
+            {t('title', { rangeLabel })}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className='text-toss-gray-700'>Menu Item</TableHead>
                 <TableHead className='text-toss-gray-700'>
-                  Sold Quantity
+                  {t('menu')}
                 </TableHead>
-                <TableHead className='text-toss-gray-700'>Revenue</TableHead>
+                <TableHead className='text-toss-gray-700'>
+                  {t('quantity')}
+                </TableHead>
+                <TableHead className='text-toss-gray-700'>
+                  {t('revenue')}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -66,10 +76,10 @@ export function PopularItems({ range }: { range: string }) {
                     {item.menu_name}
                   </TableCell>
                   <TableCell className='text-toss-gray-700'>
-                    {item.total_quantity} sold
+                    {t('sold', { count: item.total_quantity })}
                   </TableCell>
                   <TableCell className='text-toss-gray-700'>
-                    {item.total_revenue.toLocaleString()} ₩
+                    {formatPriceLabel(item.total_revenue)}
                   </TableCell>
                 </motion.tr>
               ))}

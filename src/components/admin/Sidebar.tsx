@@ -10,23 +10,27 @@ import {
   CreditCard,
   CodeIcon as ChartColumnIncreasing,
   UtensilsCrossed,
-  // Settings,
   Grid2X2Plus,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const sidebarNavItems = [
-  { title: 'Dashboard', href: '/admin', icon: Home },
-  { title: 'Orders', href: '/admin/orders', icon: ClipboardList },
-  { title: 'Payments', href: '/admin/payments', icon: CreditCard },
-  { title: 'Analytics', href: '/admin/analytics', icon: ChartColumnIncreasing },
-  { title: 'Menus', href: '/admin/menus', icon: UtensilsCrossed },
-  { title: 'Tables', href: '/admin/tables', icon: Grid2X2Plus },
-  // { title: 'Settings', href: '/admin/settings', icon: Settings },
-];
+import { useTranslations } from 'next-intl';
 
 export function Sidebar() {
   const pathname = usePathname();
+  const t = useTranslations('AdminSidebar');
+
+  const sidebarNavItems = [
+    { title: t('dashboard'), href: '/admin', icon: Home },
+    { title: t('orders'), href: '/admin/orders', icon: ClipboardList },
+    { title: t('payments'), href: '/admin/payments', icon: CreditCard },
+    {
+      title: t('analytics'),
+      href: '/admin/analytics',
+      icon: ChartColumnIncreasing,
+    },
+    { title: t('menus'), href: '/admin/menus', icon: UtensilsCrossed },
+    { title: t('tables'), href: '/admin/tables', icon: Grid2X2Plus },
+  ];
 
   return (
     <div className='hidden lg:flex flex-col h-screen bg-white border-r border-toss-gray-200'>
@@ -35,7 +39,7 @@ export function Sidebar() {
           className='flex items-center gap-2 font-semibold text-toss-gray-900'
           href='/admin'
         >
-          <span>Restaurant POS</span>
+          <span>{t('brand')}</span>
         </Link>
       </div>
       <ScrollArea className='flex-1 py-6'>
@@ -47,7 +51,6 @@ export function Sidebar() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
             >
-              {/* TODO(@smosco): link 이동일 때 로그인 여부 제대로 판단 못함 (url 쳐서 이동은 잘됨) */}
               <Link href={item.href}>
                 <span
                   className={cn(

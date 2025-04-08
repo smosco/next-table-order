@@ -52,5 +52,115 @@
   },
   "TableInfo": {
     "tableLabel": "테이블 {name}"
+  },
+  "AdminSidebar": {
+    "brand": "포스",
+    "dashboard": "매출 리포트",
+    "orders": "주문 현황",
+    "payments": "테이블 별 주문",
+    "analytics": "결제 내역",
+    "menus": "메뉴 관리",
+    "tables": "테이블 관리"
+  },
+  "AdminSalesReportPage": {
+    "title": "매출 리포트"
+  },
+  "AdminOrdersPage": {
+    "title": "현황",
+    "table": "테이블 {number}",
+    "status": {
+      "pending": "대기 중",
+      "preparing": "조리 중",
+      "ready": "서빙 준비 완료",
+      "served": "서빙 완료"
+    },
+    "timeLabel": "주문 시간: {time}",
+    "buttons": {
+      "startCooking": "조리 시작",
+      "readyToServe": "서빙 준비 완료",
+      "served": "서빙 완료"
+    }
+  },
+  "AdminMenuPage": {
+    "title": "메뉴 설정",
+    "tabs": {
+      "menu": "메뉴 목록",
+      "categories": "카테고리 설정",
+      "add": "새 메뉴 추가"
+    }
+  },
+  "AdminMenuForm": {
+    "title": {
+      "add": "새 메뉴 등록",
+      "edit": "메뉴 수정"
+    },
+    "form": {
+      "category": "카테고리",
+      "categoryPlaceholder": "카테고리를 선택하세요",
+      "image": "이미지",
+      "imagePlaceholder": "이미지를 업로드하려면 클릭하세요",
+      "name": "메뉴 이름",
+      "description": "메뉴 설명",
+      "price": "가격",
+      "submit": "메뉴 추가",
+      "update": "메뉴 수정",
+      "processing": "저장 중..."
+    },
+    "toast": {
+      "successTitle": "저장 완료",
+      "addSuccess": "메뉴가 등록되었어요.",
+      "updateSuccess": "메뉴가 수정되었어요.",
+      "errorTitle": "문제가 발생했어요",
+      "fetchCategoryFail": "카테고리를 불러올 수 없어요. 잠시 후 다시 시도해주세요.",
+      "defaultError": "예상치 못한 오류가 발생했어요"
+    }
+  },
+  "AdminOrdersByTable": {
+    "title": "주문 현황",
+    "viewOrder": "자세히 보기",
+    "closeTable": "테이블 종료",
+    "noOrder": "진행 중인 주문 없음",
+    "detailsTitle": "주문 상세",
+    "noItems": "주문 내역이 없습니다"
+  },
+  "PaymentHistoryPage": {
+    "title": "결제 내역",
+    "loading": "매출 데이터를 불러오는 중입니다...",
+    "error": "매출 데이터를 불러오지 못했어요"
+  },
+  "PopularItems": {
+    "title": "인기 메뉴 ({rangeLabel})",
+    "menu": "메뉴",
+    "quantity": "판매 수량",
+    "revenue": "매출",
+    "sold": "{count}개 판매됨",
+    "ranges": {
+      "today": "오늘",
+      "week": "이번 주",
+      "month": "이번 달"
+    }
+  },
+  "SalesFilter": {
+    "selectRange": "기간 선택",
+    "ranges": {
+      "today": "오늘",
+      "week": "이번주",
+      "month": "이번달",
+      "year": "올해"
+    }
+  },
+  "SalesSummary": {
+    "totalRevenue": "총 매출",
+    "averageDailyRevenue": "일 평균 매출",
+    "totalItemsSold": "총 판매 수량"
+  },
+  "SalesChart": {
+    "title": "매출 추이 ({range})"
+  },
+  "RangeLabels": {
+    "today": "오늘",
+    "week": "이번 주",
+    "month": "이번 달",
+    "year": "올해"
   }
 }
