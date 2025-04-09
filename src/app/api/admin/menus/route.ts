@@ -3,36 +3,59 @@ import { supabase } from '@/lib/supabaseClient';
 
 type MenuStatus = 'available' | 'sold_out' | 'hidden';
 
+interface MenuBody {
+  menuId?: string;
+  name: string;
+  description: string;
+  price: number;
+  category_id: string;
+  image_url: string;
+  status?: MenuStatus;
+  option_group_ids?: string[]; // 새롭게 포함
+}
+
+export async function GET() {
+  const { data, error } = await supabase.from('menus').select(`
+      *,
+      option_groups:menu_option_groups (
+        option_group:option_groups (*)
+      )
+    `);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  const formatted = data.map((menu) => ({
+    ...menu,
+    options: menu.option_groups.map(
+      (rel: { option_group: any }) => rel.option_group
+    ),
+  }));
+
+  return NextResponse.json(formatted, { status: 200 });
+}
+
+// 메뉴 생성
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body: MenuBody = await req.json();
     const {
       name,
       description,
       price,
       category_id,
       image_url,
-      options,
-      status,
-    }: {
-      name: string;
-      description: string;
-      price: number;
-      category_id: number;
-      image_url: string;
-      options: any[];
-      status?: MenuStatus;
+      status = 'hidden',
+      option_group_ids = [],
     } = body;
 
-    if (!name || !description || !price || !category_id || !image_url) {
+    if (!name || !price || !category_id) {
       return NextResponse.json(
         { error: 'All fields are required.' },
         { status: 400 }
       );
     }
-
-    // 기본 상태 설정 (없으면 'hidden')
-    const menuStatus: MenuStatus = status || 'hidden';
 
     const { data: menuData, error: menuError } = await supabase
       .from('menus')
@@ -43,66 +66,113 @@ export async function POST(req: NextRequest) {
           price,
           category_id,
           image_url,
-          status: menuStatus,
+          status,
         },
       ])
       .select()
       .single();
 
     if (menuError) throw menuError;
-    const menuId = menuData.id;
 
-    // 옵션 추가
-    const optionGroupPromises = options.map(async (group: any) => {
-      const { data: groupData, error: groupError } = await supabase
-        .from('option_groups')
-        .insert([
-          {
-            menu_id: menuId,
-            name: group.name,
-            is_required: group.is_required,
-            max_select: group.max_select,
-          },
-        ])
-        .select()
-        .single();
+    // menus_option_groups 테이블 연결
+    const mappings = option_group_ids.map((id) => ({
+      menu_id: menuData.id,
+      option_group_id: id,
+    }));
 
-      if (groupError) throw groupError;
-      const groupId = groupData.id;
-
-      if (group.options.length > 0) {
-        const optionInsertData = group.options.map((option: any) => ({
-          group_id: groupId,
-          name: option.name,
-          price: option.price,
-        }));
-
-        const { error: optionError } = await supabase
-          .from('options')
-          .insert(optionInsertData);
-
-        if (optionError) throw optionError;
-      }
-    });
-
-    await Promise.all(optionGroupPromises);
+    if (mappings.length > 0) {
+      const { error: linkError } = await supabase
+        .from('menus_option_groups')
+        .insert(mappings);
+      if (linkError) throw linkError;
+    }
 
     return NextResponse.json(
-      { message: 'Menu with options created successfully.', menuData },
+      { message: 'Menu created successfully', data: menuData },
       { status: 201 }
     );
   } catch (error) {
     return NextResponse.json(
       {
         error:
-          error instanceof Error ? error.message : 'An unknown error occurred.',
+          error instanceof Error ? error.message : 'Unexpected error occurred',
       },
       { status: 500 }
     );
   }
 }
 
-// 메뉴 삭제 (DELETE)
+// 메뉴 수정
+export async function PATCH(req: NextRequest) {
+  try {
+    const body: MenuBody = await req.json();
+    const {
+      menuId,
+      name,
+      description,
+      price,
+      category_id,
+      image_url,
+      status,
+      option_group_ids = [],
+    } = body;
+
+    if (!menuId) {
+      return NextResponse.json(
+        { error: 'menuId is required' },
+        { status: 400 }
+      );
+    }
+
+    const { error: updateError } = await supabase
+      .from('menus')
+      .update({
+        name,
+        description,
+        price,
+        category_id,
+        image_url,
+        status,
+      })
+      .eq('id', menuId);
+
+    if (updateError) throw updateError;
+
+    // 메뉴의 옵션 그룹 관계 갱신: 기존 삭제 후 새로 등록
+    const { error: deleteError } = await supabase
+      .from('menus_option_groups')
+      .delete()
+      .eq('menu_id', menuId);
+    if (deleteError) throw deleteError;
+
+    const newLinks = option_group_ids.map((id) => ({
+      menu_id: menuId,
+      option_group_id: id,
+    }));
+
+    if (newLinks.length > 0) {
+      const { error: insertError } = await supabase
+        .from('menus_option_groups')
+        .insert(newLinks);
+      if (insertError) throw insertError;
+    }
+
+    return NextResponse.json(
+      { message: 'Menu updated successfully' },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : 'Unexpected error occurred',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// 메뉴 삭제
 export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -115,56 +185,19 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // 메뉴 삭제 (CASCADE로 옵션 그룹 & 옵션 자동 삭제됨)
     const { error } = await supabase.from('menus').delete().eq('id', menuId);
 
     if (error) throw error;
 
     return NextResponse.json(
-      { message: 'Menu and related options deleted successfully.' },
+      { message: 'Menu deleted successfully' },
       { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
       {
         error:
-          error instanceof Error ? error.message : 'An unknown error occurred.',
-      },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PATCH(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const { menuId, status }: { menuId: string; status: MenuStatus } = body;
-
-    if (!menuId || !status) {
-      return NextResponse.json(
-        { error: 'menuId and status are required.' },
-        { status: 400 }
-      );
-    }
-
-    const { data, error } = await supabase
-      .from('menus')
-      .update({ status })
-      .eq('id', menuId)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return NextResponse.json(
-      { message: 'Menu status updated successfully.', data },
-      { status: 200 }
-    );
-  } catch (error) {
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : 'An unknown error occurred.',
+          error instanceof Error ? error.message : 'Unexpected error occurred',
       },
       { status: 500 }
     );

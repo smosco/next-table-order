@@ -17,7 +17,7 @@ export default function MenuList({
   useEffect(() => {
     async function fetchMenus() {
       try {
-        const res = await fetch('/api/public/menus');
+        const res = await fetch('/api/admin/menus');
         const data = await res.json();
         setItems(data);
       } catch (error) {
@@ -50,6 +50,8 @@ export default function MenuList({
       console.error(err);
     }
   };
+
+  console.log(items);
 
   return (
     <Card>

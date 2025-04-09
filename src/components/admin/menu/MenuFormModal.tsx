@@ -65,7 +65,7 @@ export default function MenuFormModal({
 
   const fetchOptions = async () => {
     try {
-      const res = await fetch('/api/public/options');
+      const res = await fetch('/api/admin/options');
       const data = await res.json();
       setOptions(data);
     } catch (err) {
