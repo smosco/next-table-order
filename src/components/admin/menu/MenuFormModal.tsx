@@ -97,7 +97,14 @@ export default function MenuFormModal({
         imageUrl = await handleImageUpload(fileInputRef.current.files[0]);
       }
 
-      const payload = { ...formData, image_url: imageUrl };
+      const option_group_ids = formData.options?.map((opt) => opt.id) || [];
+
+      const payload = {
+        ...formData,
+        image_url: imageUrl,
+        option_group_ids,
+      };
+
       const res = await fetch('/api/admin/menus', {
         method: menuToEdit ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
