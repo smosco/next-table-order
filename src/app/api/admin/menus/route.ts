@@ -114,7 +114,7 @@ export async function PATCH(req: NextRequest) {
       category_id,
       image_url,
       status,
-      option_group_ids = [],
+      option_group_ids,
     } = body;
 
     if (!menuId) {
@@ -124,37 +124,41 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
+    // 변경된 필드만 업데이트
+    const updates: Record<string, any> = {};
+    if (name !== undefined) updates.name = name;
+    if (description !== undefined) updates.description = description;
+    if (price !== undefined) updates.price = price;
+    if (category_id !== undefined) updates.category_id = category_id;
+    if (image_url !== undefined) updates.image_url = image_url;
+    if (status !== undefined) updates.status = status;
+
     const { error: updateError } = await supabase
       .from('menus')
-      .update({
-        name,
-        description,
-        price,
-        category_id,
-        image_url,
-        status,
-      })
+      .update(updates)
       .eq('id', menuId);
 
     if (updateError) throw updateError;
 
-    // 메뉴의 옵션 그룹 관계 갱신: 기존 삭제 후 새로 등록
-    const { error: deleteError } = await supabase
-      .from('menu_option_groups')
-      .delete()
-      .eq('menu_id', menuId);
-    if (deleteError) throw deleteError;
-
-    const newLinks = option_group_ids.map((id) => ({
-      menu_id: menuId,
-      option_group_id: id,
-    }));
-
-    if (newLinks.length > 0) {
-      const { error: insertError } = await supabase
+    // 옵션 그룹 연결 갱신
+    if (option_group_ids !== undefined) {
+      const { error: deleteError } = await supabase
         .from('menu_option_groups')
-        .insert(newLinks);
-      if (insertError) throw insertError;
+        .delete()
+        .eq('menu_id', menuId);
+      if (deleteError) throw deleteError;
+
+      const newLinks = option_group_ids.map((id) => ({
+        menu_id: menuId,
+        option_group_id: id,
+      }));
+
+      if (newLinks.length > 0) {
+        const { error: insertError } = await supabase
+          .from('menu_option_groups')
+          .insert(newLinks);
+        if (insertError) throw insertError;
+      }
     }
 
     return NextResponse.json(

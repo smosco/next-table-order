@@ -47,6 +47,32 @@ export default function MenuFormModal({
   const [showOptionModal, setShowOptionModal] = useState(false);
 
   useEffect(() => {
+    if (menuToEdit) {
+      setFormData({
+        id: menuToEdit.id,
+        name: menuToEdit.name,
+        description: menuToEdit.description,
+        price: menuToEdit.price,
+        category_id: menuToEdit.category_id,
+        options: menuToEdit.options || [],
+        image_url: menuToEdit.image_url,
+        status: menuToEdit.status || 'available',
+      });
+    } else {
+      setFormData({
+        id: '',
+        name: '',
+        description: '',
+        price: 0,
+        category_id: '',
+        options: [],
+        image_url: '',
+        status: 'available',
+      });
+    }
+  }, [menuToEdit]);
+
+  useEffect(() => {
     if (open) {
       fetchCategories();
       fetchOptions();
@@ -99,11 +125,20 @@ export default function MenuFormModal({
 
       const option_group_ids = formData.options?.map((opt) => opt.id) || [];
 
-      const payload = {
-        ...formData,
+      // POST와 PATCH에 따라 payload 분리
+      const commonPayload = {
+        name: formData.name,
+        description: formData.description,
+        price: formData.price,
+        category_id: formData.category_id,
         image_url: imageUrl,
+        status: formData.status,
         option_group_ids,
       };
+
+      const payload = menuToEdit
+        ? { ...commonPayload, menuId: formData.id } // PATCH는 menuId 포함
+        : commonPayload; // POST는 menuId 없이
 
       const res = await fetch('/api/admin/menus', {
         method: menuToEdit ? 'PATCH' : 'POST',
@@ -117,6 +152,31 @@ export default function MenuFormModal({
       }
 
       toast({ title: menuToEdit ? '수정 완료' : '등록 완료' });
+      onMenuUpdated();
+      onClose();
+    } catch (err) {
+      toast({
+        title: '오류 발생',
+        description: err instanceof Error ? err.message : '알 수 없는 오류',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!formData.id) return;
+
+    try {
+      const res = await fetch(`/api/admin/menus?menuId=${formData.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '삭제 실패');
+      }
+
+      toast({ title: '삭제 완료' });
       onMenuUpdated();
       onClose();
     } catch (err) {
@@ -265,10 +325,7 @@ export default function MenuFormModal({
 
           <div className='flex justify-between pt-4'>
             {menuToEdit && (
-              <Button
-                variant='destructive'
-                onClick={() => toast({ title: '삭제 로직 구현 필요' })}
-              >
+              <Button variant='destructive' onClick={handleDelete}>
                 삭제
               </Button>
             )}
