@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     if (menuError) throw menuError;
 
-    // menus_option_groups 테이블 연결
+    // menu_option_groups 테이블 연결
     const mappings = option_group_ids.map((id) => ({
       menu_id: menuData.id,
       option_group_id: id,
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
     if (mappings.length > 0) {
       const { error: linkError } = await supabase
-        .from('menus_option_groups')
+        .from('menu_option_groups')
         .insert(mappings);
       if (linkError) throw linkError;
     }
@@ -140,7 +140,7 @@ export async function PATCH(req: NextRequest) {
 
     // 메뉴의 옵션 그룹 관계 갱신: 기존 삭제 후 새로 등록
     const { error: deleteError } = await supabase
-      .from('menus_option_groups')
+      .from('menu_option_groups')
       .delete()
       .eq('menu_id', menuId);
     if (deleteError) throw deleteError;
@@ -152,7 +152,7 @@ export async function PATCH(req: NextRequest) {
 
     if (newLinks.length > 0) {
       const { error: insertError } = await supabase
-        .from('menus_option_groups')
+        .from('menu_option_groups')
         .insert(newLinks);
       if (insertError) throw insertError;
     }
