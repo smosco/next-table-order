@@ -233,6 +233,17 @@ export default function MenuFormModal({
             </div>
 
             <div>
+              <Label>설명</Label>
+              <Input
+                placeholder='상품 설명을 입력하세요'
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
               <Label>기본 가격</Label>
               <Input
                 type='number'
