@@ -20,8 +20,8 @@ export function Sidebar() {
   const t = useTranslations('AdminSidebar');
 
   const sidebarNavItems = [
-    { title: t('dashboard'), href: '/admin', icon: Home },
-    { title: t('orders'), href: '/admin/orders', icon: ClipboardList },
+    { title: t('orders'), href: '/admin', icon: ClipboardList },
+    { title: t('dashboard'), href: '/admin/report', icon: Home },
     { title: t('payments'), href: '/admin/payments', icon: CreditCard },
     {
       title: t('analytics'),
