@@ -22,7 +22,7 @@ export default function CategoryModal({ open, onClose }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
 
-  // ✅ 카테고리 불러오기
+  // 카테고리 불러오기
   useEffect(() => {
     if (!open) return;
     fetch('/api/public/categories')
@@ -31,7 +31,7 @@ export default function CategoryModal({ open, onClose }: Props) {
       .catch(console.error);
   }, [open]);
 
-  // ✅ 카테고리 추가
+  // 카테고리 추가
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) return;
     const res = await fetch('/api/admin/categories', {
@@ -47,7 +47,7 @@ export default function CategoryModal({ open, onClose }: Props) {
     }
   };
 
-  // ✅ 카테고리 수정
+  // 카테고리 수정
   const handleUpdateCategory = async (id: string) => {
     const res = await fetch(`/api/admin/categories/${id}`, {
       method: 'PATCH',
@@ -64,7 +64,7 @@ export default function CategoryModal({ open, onClose }: Props) {
     }
   };
 
-  // ✅ 카테고리 삭제
+  // 카테고리 삭제
   const handleDeleteCategory = async (id: string) => {
     const res = await fetch(`/api/admin/categories/${id}`, {
       method: 'DELETE',

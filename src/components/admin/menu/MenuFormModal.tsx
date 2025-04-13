@@ -349,7 +349,10 @@ export default function MenuFormModal({
       />
       <OptionModal
         open={showOptionModal}
-        onClose={() => setShowOptionModal(false)}
+        onClose={() => {
+          setShowOptionModal(false);
+          fetchOptions();
+        }}
       />
     </>
   );
