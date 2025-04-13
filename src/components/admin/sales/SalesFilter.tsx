@@ -1,17 +1,10 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 
-const ranges = ['today', 'week', 'month', 'year'] as const;
+const ranges = ['today', 'week', 'month'] as const;
 
 export function SalesFilter({
   range,
@@ -23,29 +16,22 @@ export function SalesFilter({
   const t = useTranslations('SalesFilter');
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Button
-            variant='outline'
-            className='bg-white text-toss-gray-700 border-toss-gray-200'
-          >
-            {t(`ranges.${range}`) || t('selectRange')}
-            <ChevronDown className='ml-2 h-4 w-4 text-toss-gray-500' />
-          </Button>
-        </motion.div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className='bg-white border border-toss-gray-200 rounded-lg shadow-lg'>
-        {ranges.map((key) => (
-          <DropdownMenuItem
-            key={key}
-            onClick={() => onChange(key)}
-            className='text-toss-gray-700 hover:bg-toss-blue-light hover:text-toss-blue transition-colors'
-          >
-            {t(`ranges.${key}`)}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className='flex gap-4'>
+      {ranges.map((key) => (
+        <motion.button
+          key={key}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => onChange(key)}
+          className={cn(
+            'px-4 py-2 rounded-full text-sm font-medium transition-colors',
+            range === key
+              ? 'bg-toss-gray-100 text-toss-gray-900 font-bold'
+              : 'text-toss-gray-700 hover:text-toss-gray-900 hover:bg-toss-gray-50'
+          )}
+        >
+          {t(`ranges.${key}`)}
+        </motion.button>
+      ))}
+    </div>
   );
 }
