@@ -109,7 +109,7 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className='p-6 bg-gray-50 min-h-screen'>
+    <div className='min-h-screen'>
       <h1 className='text-3xl font-bold mb-6 text-gray-900'>{t('title')}</h1>
       {isLoading ? (
         <div className='flex justify-center items-center h-64'>

@@ -43,7 +43,7 @@ export default function TableManagementPage() {
   };
 
   return (
-    <div className='max-w-lg mx-auto mt-10 space-y-4'>
+    <div className='space-y-4'>
       <h1 className='text-xl font-bold'>테이블 관리</h1>
 
       {/* 테이블 추가 */}

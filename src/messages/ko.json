@@ -4,13 +4,6 @@
     "admin": "사장님용으로 사용할게요",
     "customer": "손님이 직접 주문하게 할게요"
   },
-  "AdminLoginPage": {
-    "title": "관리자 로그인",
-    "email": "이메일 입력",
-    "password": "비밀번호 입력",
-    "submit": "로그인",
-    "error": "로그인에 실패했어요. 정보를 다시 확인해주세요."
-  },
   "CustomerMenuPage": {
     "loading": "메뉴를 불러오는 중이에요",
     "soldOutBadge": "품절"

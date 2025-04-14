@@ -113,7 +113,7 @@ export default function Orders() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className='p-6 bg-gray-100 min-h-screen'
+      className='min-h-screen'
     >
       <h1 className='text-3xl font-bold mb-6'>{t('title')}</h1>
 

@@ -16,7 +16,6 @@ export default function OrdersPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className='container mx-auto py-10 px-4'
     >
       <h1 className='text-3xl font-bold mb-6 text-toss-gray-900'>
         {t('title')}

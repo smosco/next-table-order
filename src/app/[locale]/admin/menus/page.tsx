@@ -16,7 +16,7 @@ export default function MenuPage() {
   };
 
   return (
-    <div className='py-20 px-4'>
+    <div>
       <div className='flex justify-between items-center mb-6'>
         <h2 className='text-2xl font-bold'>상품 관리</h2>
         <div className='flex gap-2'>

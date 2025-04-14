@@ -4,13 +4,6 @@
     "admin": "Set up for staff use",
     "customer": "Set up for customer ordering"
   },
-  "AdminLoginPage": {
-    "title": "Log in to manage your store",
-    "email": "Enter your email",
-    "password": "Enter your password",
-    "submit": "Log in",
-    "error": "Login failed. Please check your information"
-  },
   "CustomerMenuPage": {
     "loading": "Loading menu...",
     "soldOutBadge": "Sold out"

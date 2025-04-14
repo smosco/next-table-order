@@ -11,7 +11,7 @@ export default function DashboardPage() {
   const t = useTranslations('AdminSalesReportPage');
   const [selectedRange, setSelectedRange] = useState('week');
   return (
-    <div className='pt-24 p-8 space-y-8'>
+    <div className='space-y-8'>
       <h1 className='text-3xl font-bold'>{t('title')}</h1>
 
       <SalesFilter range={selectedRange} onChange={setSelectedRange} />
