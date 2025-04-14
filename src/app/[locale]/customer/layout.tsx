@@ -36,8 +36,6 @@ export default function CustomerLayout({
   const [tables, setTables] = useState<Table[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  console.log({ tableId, tableName });
-
   // 테이블 목록 불러오기
   useEffect(() => {
     fetch('/api/admin/tables')
@@ -75,7 +73,7 @@ export default function CustomerLayout({
       <div className='flex h-screen bg-background'>
         <CategorySidebar />
         <main className='flex-1 flex flex-col'>
-          <TableInfo tableName={tableName || 'No Table Selected'} />
+          <TableInfo tableId={tableId || 'No Table Selected'} />
           <div className='flex-1 overflow-auto'>{children}</div>
           <BottomBar />
         </main>

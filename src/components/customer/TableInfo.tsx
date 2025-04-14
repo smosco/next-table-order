@@ -11,7 +11,7 @@ const languages = [
   { code: 'ko', name: '한국어' },
 ];
 
-export function TableInfo({ tableName }: { tableName: string }) {
+export function TableInfo({ tableId }: { tableId: string }) {
   const t = useTranslations('TableInfo');
   const [isOpen, setIsOpen] = useState(false);
   const locale = useLocale(); // 현재 locale 가져오기
@@ -75,7 +75,7 @@ export function TableInfo({ tableName }: { tableName: string }) {
       >
         <span className='text-3xl font-bold text-toss-blue'>
           {/* TODO(@smosco): tableName을 보여줄 필요 없음 */}
-          {t('tableLabel', { name: tableName })}
+          {t('tableLabel', { name: tableId })}
         </span>
       </motion.div>
     </div>
