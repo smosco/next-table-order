@@ -57,36 +57,35 @@ export function PaymentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('title')}</DialogTitle>
-        </DialogHeader>
-
-        <p className='text-base text-toss-gray-900 font-semibold mb-4'>
+      <DialogContent className='w-full max-w-md p-8'>
+        <DialogTitle className='text-2xl font-bold'>{t('title')}</DialogTitle>
+        <p className='text-2xl text-toss-gray-900 font-semibold mb-6'>
           {t('total')}: {formatPriceLabel(totalPrice)}
         </p>
 
-        <div className='flex gap-2 mb-4'>
+        <div className='flex gap-4 mb-6'>
           <Button
             variant={paymentMethod === 'card' ? 'default' : 'outline'}
             onClick={() => setPaymentMethod('card')}
+            className='text-xl py-6 flex-1'
           >
             {t('card')}
           </Button>
           <Button
             variant={paymentMethod === 'cash' ? 'default' : 'outline'}
             onClick={() => setPaymentMethod('cash')}
+            className='text-xl py-6 flex-1'
           >
             {t('cash')}
           </Button>
         </div>
 
-        {error && <p className='text-red-500 text-sm'>{error}</p>}
+        {error && <p className='text-red-500 text-base mb-4'>{error}</p>}
 
         <Button
           onClick={handlePayment}
           disabled={loading}
-          className='mt-2 w-full'
+          className='w-full py-6 text-xl font-medium'
         >
           {loading ? t('loading') : t('submit')}
         </Button>

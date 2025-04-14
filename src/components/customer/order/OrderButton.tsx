@@ -43,7 +43,11 @@ export function OrderButton({
   };
 
   return (
-    <Button onClick={handleOrder} disabled={loading || cartItems.length === 0}>
+    <Button
+      onClick={handleOrder}
+      disabled={loading || cartItems.length === 0}
+      className='w-full py-6 text-lg font-medium rounded-xl'
+    >
       {loading ? t('loading') : t('submit')}
     </Button>
   );

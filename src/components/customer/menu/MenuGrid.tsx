@@ -98,10 +98,12 @@ export function MenuGrid() {
     <div className='flex flex-col h-full'>
       <div
         ref={menuRef}
-        className='flex-1 overflow-y-auto px-6 py-8 space-y-12'
+        className='flex-1 overflow-y-auto px-8 py-10 space-y-16'
       >
         {isLoading ? (
-          <p className='text-center text-toss-gray-600'>{t('loading')}</p>
+          <p className='text-center text-xl text-toss-gray-600'>
+            {t('loading')}
+          </p>
         ) : (
           Object.entries(groupedMenus).map(([categoryId, { name, items }]) => (
             <div
@@ -110,12 +112,12 @@ export function MenuGrid() {
               ref={(el) => {
                 categoryRefs.current[categoryId] = el;
               }}
-              className='pb-10 border-b-2 border-gray-200'
+              className='pb-12 border-b-2 border-gray-200'
             >
-              <h2 className='text-2xl font-bold mb-6 text-toss-gray-900'>
+              <h2 className='text-3xl font-bold mb-8 text-toss-gray-900'>
                 {name}
               </h2>
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
                 {items.map((item) => (
                   <motion.div
                     key={item.id}
@@ -138,25 +140,25 @@ export function MenuGrid() {
                           src={item.image_url || '/placeholder.png'}
                           alt={item.name}
                           width={343}
-                          height={200}
-                          className='w-full h-48 object-cover'
+                          height={240}
+                          className='w-full h-56 object-cover'
                         />
                         {item.status === 'sold_out' && (
-                          <div className='absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-xs font-bold rounded'>
+                          <div className='absolute top-3 left-3 bg-red-500 text-white px-3 py-1 text-sm font-bold rounded'>
                             {t('soldOutBadge')}
                           </div>
                         )}
                       </div>
-                      <CardContent className='p-4'>
-                        <h3 className='text-lg font-semibold mb-2 text-toss-gray-900'>
+                      <CardContent className='p-5'>
+                        <h3 className='text-xl font-semibold mb-3 text-toss-gray-900'>
                           {item.name}
                         </h3>
-                        <p className='text-sm text-toss-gray-600 mb-3 line-clamp-2'>
+                        <p className='text-base text-toss-gray-600 mb-4 line-clamp-2'>
                           {item.description}
                         </p>
                         <Badge
                           variant='secondary'
-                          className='text-lg bg-toss-blue-light text-toss-blue'
+                          className='text-xl bg-toss-blue-light text-toss-blue px-3 py-1.5'
                         >
                           {formatPriceLabel(item.price)}
                         </Badge>

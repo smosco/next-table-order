@@ -11,7 +11,7 @@ export function useFormatters() {
    */
   const formatPriceLabel = (amount: number) => {
     const suffix = locale === 'ko' ? '원' : 'KRW';
-    return `${amount.toLocaleString(locale)} ${suffix}`.trim();
+    return `${amount.toLocaleString(locale)}${suffix}`.trim();
   };
 
   const formatDateTime = (value: string | Date) =>
@@ -24,7 +24,7 @@ export function useFormatters() {
     }).format(new Date(value));
 
   const formatQuantityLabel = (amount: number) => {
-    const suffix = locale === 'ko' ? ' 개' : ' EA';
+    const suffix = locale === 'ko' ? '개' : 'EA';
     return `${amount.toLocaleString(locale)}${suffix}`;
   };
 

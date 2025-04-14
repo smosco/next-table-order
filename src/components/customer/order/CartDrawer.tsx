@@ -46,10 +46,10 @@ export function CartDrawer() {
       <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
         <SheetContent
           side='right'
-          className='w-full sm:max-w-[540px] p-6 bg-toss-gray-100'
+          className='w-full sm:max-w-[540px] p-8 bg-toss-gray-100'
         >
           <div className='flex flex-col h-full'>
-            <h2 className='font-semibold text-2xl mb-6 text-toss-gray-900'>
+            <h2 className='font-semibold text-3xl mb-8 text-toss-gray-900'>
               {t('title')}
             </h2>
 
@@ -60,12 +60,12 @@ export function CartDrawer() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className='text-center text-toss-gray-600 text-lg py-8'
+                    className='text-center text-toss-gray-600 text-xl py-10'
                   >
                     {t('empty')}
                   </motion.p>
                 ) : (
-                  <motion.div layout className='space-y-6'>
+                  <motion.div layout className='space-y-8'>
                     {items.map((item) => {
                       const optionsTotal =
                         item.options?.reduce(
@@ -84,18 +84,18 @@ export function CartDrawer() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -20 }}
-                          className='flex flex-col gap-3 bg-white rounded-2xl p-4 shadow-sm'
+                          className='flex flex-col gap-4 bg-white rounded-2xl p-6 shadow-sm'
                         >
                           <div className='flex justify-between items-start'>
                             <div>
-                              <h3 className='font-medium text-lg text-toss-gray-900'>
+                              <h3 className='font-medium text-xl text-toss-gray-900'>
                                 {item.name}
                               </h3>
-                              <p className='text-base text-toss-gray-700'>
+                              <p className='text-xl text-toss-gray-700'>
                                 {formatPriceLabel(itemTotalPrice)}
                               </p>
                               {item.options && item.options.length > 0 && (
-                                <div className='mt-2 text-sm text-toss-gray-600'>
+                                <div className='mt-3 text-lg text-toss-gray-600'>
                                   {item.options.map((opt) => (
                                     <p
                                       key={opt.optionId}
@@ -113,11 +113,11 @@ export function CartDrawer() {
                               )}
                             </div>
 
-                            <div className='flex items-center gap-2'>
+                            <div className='flex items-center gap-3'>
                               <Button
                                 variant='outline'
                                 size='icon'
-                                className='h-8 w-8 rounded-full bg-toss-gray-200 border-none text-toss-gray-700'
+                                className='h-14 w-14 rounded-full bg-toss-gray-200 border-none text-toss-gray-700'
                                 onClick={() =>
                                   updateQuantity(
                                     item.menuId,
@@ -125,28 +125,37 @@ export function CartDrawer() {
                                   )
                                 }
                               >
-                                <Minus className='h-4 w-4' />
+                                <Minus
+                                  style={{ width: '28px', height: '28px' }}
+                                />
                               </Button>
-                              <span className='w-8 text-center text-lg text-toss-gray-900'>
+
+                              <span className='w-10 text-center text-2xl text-toss-gray-900'>
                                 {item.quantity}
                               </span>
+
                               <Button
                                 variant='outline'
                                 size='icon'
-                                className='h-8 w-8 rounded-full bg-toss-gray-200 border-none text-toss-gray-700'
+                                className='h-14 w-14 rounded-full bg-toss-gray-200 border-none text-toss-gray-700'
                                 onClick={() =>
                                   updateQuantity(item.menuId, item.quantity + 1)
                                 }
                               >
-                                <Plus className='h-4 w-4' />
+                                <Plus
+                                  style={{ width: '28px', height: '28px' }}
+                                />
                               </Button>
+
                               <Button
                                 variant='ghost'
                                 size='icon'
-                                className='h-8 w-8 text-toss-gray-500 hover:text-toss-gray-700'
+                                className='h-14 w-14 text-toss-gray-500 hover:text-toss-gray-700'
                                 onClick={() => removeItem(item.menuId)}
                               >
-                                <Trash2 className='h-4 w-4' />
+                                <Trash2
+                                  style={{ width: '28px', height: '28px' }}
+                                />
                               </Button>
                             </div>
                           </div>
@@ -160,15 +169,15 @@ export function CartDrawer() {
 
             <motion.div
               layout
-              className='border-t border-toss-gray-300 pt-6 mt-6'
+              className='border-t border-toss-gray-300 pt-8 mt-8'
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <div className='flex justify-between mb-6'>
-                <span className='font-semibold text-xl text-toss-gray-900'>
+              <div className='flex justify-between mb-8'>
+                <span className='font-semibold text-2xl text-toss-gray-900'>
                   {t('total')}
                 </span>
-                <span className='font-semibold text-xl text-toss-blue'>
+                <span className='font-semibold text-2xl text-toss-blue'>
                   {formatPriceLabel(total)}
                 </span>
               </div>
@@ -176,12 +185,12 @@ export function CartDrawer() {
               {/* 테이블 ID가 있을 때만 주문 가능하도록 수정 */}
               {tableId ? (
                 <OrderButton
-                  tableId={parseInt(tableId, 10)}
+                  tableId={Number.parseInt(tableId, 10)}
                   cartItems={items}
                   onOrderSuccess={handleOrderSuccess}
                 />
               ) : (
-                <p className='text-center text-red-500 font-medium'>
+                <p className='text-center text-red-500 font-medium text-lg'>
                   {t('needTable')}
                 </p>
               )}

@@ -115,7 +115,7 @@ export default function MenuDetailModal({
 
   return (
     <Dialog open={!!menuId} onOpenChange={onClose}>
-      <DialogContent className='sm:max-w-[425px] max-h-[90vh] p-0 overflow-hidden bg-white'>
+      <DialogContent className='sm:max-w-[480px] max-h-[90vh] p-0 overflow-y-scroll bg-white'>
         <AnimatePresence>
           {menu ? (
             <motion.div
@@ -127,27 +127,27 @@ export default function MenuDetailModal({
               <Image
                 src={menu.image_url || '/placeholder.png'}
                 alt={menu.name}
-                width={425}
-                height={200}
-                className='w-full h-40 object-cover'
+                width={480}
+                height={480}
+                className='w-full object-cover'
               />
-              <DialogHeader className='p-4'>
-                <DialogTitle className='text-xl font-bold text-toss-gray-900'>
+              <DialogHeader className='p-6'>
+                <DialogTitle className='text-3xl font-bold text-toss-gray-900'>
                   {menu.name}
                 </DialogTitle>
-                <p className='text-sm text-toss-gray-700 mt-1'>
+                <p className='text-xl text-toss-gray-700 mt-2'>
                   {menu.description}
                 </p>
               </DialogHeader>
-              <ScrollArea className='flex-grow px-4 pb-4'>
+              <ScrollArea className='flex-grow px-6 pb-6'>
                 {menu?.option_groups?.map((group) => (
-                  <div key={group.id} className='mb-4'>
-                    <h3 className='text-sm font-semibold text-toss-gray-900 mb-2'>
+                  <div key={group.id} className='mb-6'>
+                    <h3 className='text-xl font-semibold text-toss-gray-900 mb-3'>
                       {group.name}
                     </h3>
                     {group.max_select === 1 ? (
                       <RadioGroup
-                        className='space-y-1'
+                        className='space-y-2'
                         value={selectedOptions[group.id]?.[0] || ''}
                         onValueChange={(value) =>
                           handleOptionChange(group.id, value, false)
@@ -158,21 +158,21 @@ export default function MenuDetailModal({
                             <RadioGroupItem
                               value={option.id}
                               id={option.id}
-                              className='border-toss-gray-300 text-toss-blue'
+                              className='h-5 w-5 border-toss-gray-300 text-toss-blue'
                             />
                             <label
                               htmlFor={option.id}
-                              className='ml-2 text-sm text-toss-gray-700'
+                              className='ml-3 text-toss-gray-700'
                             >
                               {option.name}
                               {option.price > 0 &&
-                                `(+${formatPriceLabel(option.price)})`}
+                                ` (+${formatPriceLabel(option.price)})`}
                             </label>
                           </div>
                         ))}
                       </RadioGroup>
                     ) : (
-                      <div className='space-y-1'>
+                      <div className='space-y-2'>
                         {group.options.map((option) => (
                           <div key={option.id} className='flex items-center'>
                             <Checkbox
@@ -185,15 +185,15 @@ export default function MenuDetailModal({
                               onCheckedChange={() =>
                                 handleOptionChange(group.id, option.id, true)
                               }
-                              className='border-toss-gray-300 text-toss-blue'
+                              className='h-8 w-8 border-toss-gray-300 text-toss-blue'
                             />
                             <label
                               htmlFor={option.id}
-                              className='ml-2 text-sm text-toss-gray-700'
+                              className='ml-3 text-xl text-toss-gray-700'
                             >
                               {option.name}
                               {option.price > 0 &&
-                                `( +${formatPriceLabel(option.price)} )`}
+                                ` (+${formatPriceLabel(option.price)})`}
                             </label>
                           </div>
                         ))}
@@ -202,36 +202,36 @@ export default function MenuDetailModal({
                   </div>
                 ))}
               </ScrollArea>
-              <div className='p-4 bg-toss-gray-100 border-t border-toss-gray-200'>
-                <div className='flex items-center justify-between mb-3'>
-                  <div className='flex items-center space-x-2'>
+              <div className='p-6 bg-toss-gray-100 border-t border-toss-gray-200'>
+                <div className='flex items-center justify-between mb-4'>
+                  <div className='flex items-center space-x-3'>
                     <Button
                       variant='outline'
                       size='icon'
-                      className='h-8 w-8 rounded-full'
+                      className='h-12 w-12 rounded-full'
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                     >
-                      <Minus className='w-4 h-4' />
+                      <Minus style={{ width: '24px', height: '24px' }} />
                     </Button>
-                    <span className='w-8 text-center text-lg font-semibold text-toss-gray-900'>
+                    <span className='w-10 text-center text-2xl font-semibold text-toss-gray-900'>
                       {quantity}
                     </span>
                     <Button
                       variant='outline'
                       size='icon'
-                      className='h-8 w-8 rounded-full'
+                      className='h-12 w-12 rounded-full'
                       onClick={() => setQuantity((q) => q + 1)}
                     >
-                      <Plus className='w-4 h-4' />
+                      <Plus style={{ width: '24px', height: '24px' }} />
                     </Button>
                   </div>
-                  <span className='text-lg font-bold text-toss-blue'>
+                  <span className='text-2xl font-bold text-toss-blue'>
                     {formatPriceLabel(menu.price * quantity)}
                   </span>
                 </div>
                 <Button
                   onClick={handleAddToCart}
-                  className='w-full py-2 bg-toss-blue hover:bg-toss-blue-dark text-white'
+                  className='w-full h-14 text-xl bg-toss-blue hover:bg-toss-blue-dark text-white rounded-xl'
                 >
                   {t('addToOrder')}
                 </Button>
@@ -244,7 +244,7 @@ export default function MenuDetailModal({
               exit={{ opacity: 0 }}
               className='flex items-center justify-center h-64'
             >
-              <p className='text-center text-lg text-toss-gray-600'>
+              <p className='text-center text-xl text-toss-gray-600'>
                 {t('loading')}
               </p>
             </motion.div>

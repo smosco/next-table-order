@@ -22,15 +22,15 @@ export function CategorySidebar() {
   };
 
   return (
-    <div className='w-64 bg-white shadow-lg rounded-r-2xl overflow-hidden'>
+    <div className='w-80 bg-white shadow-lg overflow-hidden'>
       <ScrollArea className='h-full'>
-        <nav className='p-4 space-y-2'>
+        <nav className='p-6 space-y-3'>
           {categories?.map((category) => (
             <motion.button
               key={category.id}
               className={cn(
-                'w-full text-left px-4 py-3 rounded-xl transition-all duration-200 ease-in-out',
-                'text-toss-gray-700 hover:bg-toss-blue-light hover:text-toss-blue',
+                'w-full text-left px-6 py-4 rounded-xl transition-all duration-200 ease-in-out',
+                'text-lg text-toss-gray-700 hover:bg-toss-blue-light hover:text-toss-blue',
                 activeCategory === category.id &&
                   'bg-toss-blue-light text-toss-blue font-medium'
               )}
