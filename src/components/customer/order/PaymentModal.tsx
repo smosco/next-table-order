@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { useTranslations } from 'next-intl';
 import { useFormatters } from '@/hooks/useFormatters';
+import { track } from '@/lib/mixpanel';
 
 export function PaymentModal({
   orderId,
@@ -43,6 +44,13 @@ export function PaymentModal({
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
+
+      track('order_completed', {
+        orderId,
+        totalPrice,
+        paymentMethod,
+        itemCount: data.items?.length ?? undefined,
+      });
 
       alert(t('success'));
       clearCart();

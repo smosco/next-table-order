@@ -18,6 +18,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useFormatters } from '@/hooks/useFormatters';
+import { track } from '@/lib/mixpanel';
 
 interface Option {
   id: string;
@@ -54,8 +55,6 @@ export default function MenuDetailModal({
 
   const queryClient = useQueryClient();
   const menu = queryClient.getQueryData<MenuItem>(['menu', menuId]); // Tanstack Query에서 데이터 가져오기
-
-  console.log(menu?.option_groups);
 
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
@@ -101,6 +100,21 @@ export default function MenuDetailModal({
       name: menu.name,
       price: menu.price,
       quantity,
+      options: selectedOptionDetails.map((opt) => ({
+        optionId: opt.id,
+        optionName: opt.name,
+        price: opt.price,
+      })),
+    });
+
+    track('add_to_cart', {
+      menuId: menu.id,
+      menuName: menu.name,
+      price: menu.price,
+      quantity,
+      totalPrice:
+        menu.price * quantity +
+        selectedOptionDetails.reduce((sum, o) => sum + o.price, 0),
       options: selectedOptionDetails.map((opt) => ({
         optionId: opt.id,
         optionName: opt.name,

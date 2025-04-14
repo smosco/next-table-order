@@ -1,4 +1,3 @@
-// app/[locale]/layout.tsx
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { QueryProvider } from '@/providers/QueryClientProvider';
@@ -6,6 +5,7 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import '../globals.css';
+import MixpanelProviders from '../MixpanelProviders';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -34,15 +34,16 @@ export default async function LocaleLayout({
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-  console.log(locale);
   return (
     <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryProvider>
-          <NextIntlClientProvider>{children}</NextIntlClientProvider>
-        </QueryProvider>
+        <MixpanelProviders>
+          <QueryProvider>
+            <NextIntlClientProvider>{children}</NextIntlClientProvider>
+          </QueryProvider>
+        </MixpanelProviders>
       </body>
     </html>
   );

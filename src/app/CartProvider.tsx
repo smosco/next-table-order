@@ -7,7 +7,7 @@ type CartItem = {
   name: string;
   price: number;
   quantity: number;
-  options?: { optionId: string; optionName: string; price: number }[];
+  options: { optionId: string; optionName: string; price: number }[];
 };
 
 type CartContextType = {

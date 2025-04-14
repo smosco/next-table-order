@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
+import { track } from '@/lib/mixpanel';
 
 export function OrderButton({
   tableId,
@@ -10,7 +11,13 @@ export function OrderButton({
   onOrderSuccess,
 }: {
   tableId: number;
-  cartItems: { menuId: string; quantity: number; price: number }[];
+  cartItems: {
+    menuId: string;
+    name: string;
+    options: { optionId: string; optionName: string; price: number }[];
+    price: number;
+    quantity: number;
+  }[];
   onOrderSuccess: (orderId: string) => void;
 }) {
   const t = useTranslations('OrderButton');
@@ -21,8 +28,24 @@ export function OrderButton({
     0
   );
 
+  console.log(cartItems);
+
   const handleOrder = async () => {
     setLoading(true);
+
+    track('checkout_started', {
+      itemCount: cartItems.length,
+      totalPrice,
+      tableId: tableId,
+      items: cartItems.map((item) => ({
+        menuId: item.menuId,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        options: item.options.map((opt) => opt.optionName),
+      })),
+    });
+
     try {
       const response = await fetch('/api/public/orders', {
         method: 'POST',
