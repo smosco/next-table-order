@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '@/app/CartProvider';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { OrderButton } from './OrderButton';
 import { PaymentModal } from './PaymentModal';
@@ -46,12 +46,12 @@ export function CartDrawer() {
       <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
         <SheetContent
           side='right'
-          className='w-full sm:max-w-[540px] p-8 bg-toss-gray-100'
+          className='w-full sm:max-w-[540px] p-8 bg-toss-gray-100 '
         >
           <div className='flex flex-col h-full'>
-            <h2 className='font-semibold text-3xl mb-8 text-toss-gray-900'>
+            <SheetTitle className='font-semibold text-3xl mb-8 text-toss-gray-900'>
               {t('title')}
-            </h2>
+            </SheetTitle>
 
             <ScrollArea className='flex-1 -mx-6 px-6'>
               <AnimatePresence>
