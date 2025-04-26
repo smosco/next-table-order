@@ -36,7 +36,7 @@ export function OrderButton({
     track('checkout_started', {
       itemCount: cartItems.length,
       totalPrice,
-      tableId: tableId,
+      tableId,
       items: cartItems.map((item) => ({
         menuId: item.menuId,
         name: item.name,

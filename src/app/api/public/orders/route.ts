@@ -25,112 +25,132 @@ interface OrderItem {
   }[]; // 옵션이 여러 개 있을 수 있으므로 배열로 정의
 }
 
+// export async function POST(req: Request) {
+//   try {
+//     const { tableId, items, totalPrice } = await req.json();
+
+//     if (!items || items.length === 0) {
+//       return NextResponse.json(
+//         { error: 'Invalid order data' },
+//         { status: 400 }
+//       );
+//     }
+
+//     // 1. 현재 열린 order_group 찾기
+//     let { data: existingGroup } = await supabase
+//       .from('order_groups')
+//       .select('id')
+//       .eq('table_id', tableId)
+//       .is('closed_at', null)
+//       .single();
+
+//     // 2. 새 order_group 생성 (없다면)
+//     if (!existingGroup) {
+//       const { data: newGroup, error: groupError } = await supabase
+//         .from('order_groups')
+//         .insert([{ table_id: tableId }])
+//         .select('id')
+//         .single();
+//       if (groupError) throw groupError;
+//       existingGroup = newGroup;
+//     }
+
+//     const orderGroupId = existingGroup.id;
+
+//     // 3. 주문 생성 (`payment_status: 'pending'` 추가)
+//     const { data: orderData, error: orderError } = await supabase
+//       .from('orders')
+//       .insert([
+//         {
+//           table_id: tableId,
+//           total_price: totalPrice,
+//           status: 'pending', // 주문 상태는 기본적으로 'pending'
+//           payment_status: 'pending', // 결제 상태 추가
+//           order_group_id: orderGroupId,
+//         },
+//       ])
+//       .select('id')
+//       .single();
+
+//     if (orderError) throw orderError;
+//     const orderId = orderData.id;
+
+//     // 4. 주문 항목 추가
+//     const orderItemsData = items.map((item: any) => ({
+//       order_id: orderId,
+//       menu_id: item.menuId,
+//       quantity: item.quantity,
+//       price: item.price,
+//     }));
+
+//     const { data: insertedOrderItems, error: orderItemsError } = await supabase
+//       .from('order_items')
+//       .insert(orderItemsData)
+//       .select('id, menu_id');
+
+//     if (orderItemsError) throw orderItemsError;
+
+//     // 5. 주문 항목 옵션 추가
+//     const orderItemOptionsData = [];
+
+//     for (const orderItem of insertedOrderItems) {
+//       const item = items.find((i: any) => i.menuId === orderItem.menu_id);
+//       if (item && item.options) {
+//         for (const option of item.options) {
+//           orderItemOptionsData.push({
+//             order_item_id: orderItem.id,
+//             option_id: option.optionId,
+//             option_price: option.price,
+//           });
+//         }
+//       }
+//     }
+
+//     if (orderItemOptionsData.length > 0) {
+//       const { error: orderItemOptionsError } = await supabase
+//         .from('order_item_options')
+//         .insert(orderItemOptionsData);
+
+//       if (orderItemOptionsError) throw orderItemOptionsError;
+//     }
+
+//     // 6. 주문 결제 요청(`payments`) 자동 생성 (pending 상태)
+//     const { error: paymentError } = await supabase.from('payments').insert([
+//       {
+//         order_id: orderId,
+//         amount: totalPrice,
+//         status: 'pending', // 기본 결제 상태
+//       },
+//     ]);
+
+//     if (paymentError) throw paymentError;
+
+//     return NextResponse.json({ orderId, orderGroupId }, { status: 201 });
+//   } catch (error: any) {
+//     return NextResponse.json(
+//       { error: error.message || 'Unknown error' },
+//       { status: 500 }
+//     );
+//   }
+// }
+
 export async function POST(req: Request) {
   try {
     const { tableId, items, totalPrice } = await req.json();
 
-    if (!items || items.length === 0) {
-      return NextResponse.json(
-        { error: 'Invalid order data' },
-        { status: 400 }
-      );
+    const { data, error } = await supabase.rpc('create_order_with_items', {
+      p_table_id: tableId,
+      p_items: items,
+      p_total_price: totalPrice,
+    });
+
+    if (error) {
+      throw new Error(error.message);
     }
 
-    // 1. 현재 열린 order_group 찾기
-    let { data: existingGroup } = await supabase
-      .from('order_groups')
-      .select('id')
-      .eq('table_id', tableId)
-      .is('closed_at', null)
-      .single();
-
-    // 2. 새 order_group 생성 (없다면)
-    if (!existingGroup) {
-      const { data: newGroup, error: groupError } = await supabase
-        .from('order_groups')
-        .insert([{ table_id: tableId }])
-        .select('id')
-        .single();
-      if (groupError) throw groupError;
-      existingGroup = newGroup;
-    }
-
-    const orderGroupId = existingGroup.id;
-
-    // 3. 주문 생성 (`payment_status: 'pending'` 추가)
-    const { data: orderData, error: orderError } = await supabase
-      .from('orders')
-      .insert([
-        {
-          table_id: tableId,
-          total_price: totalPrice,
-          status: 'pending', // 주문 상태는 기본적으로 'pending'
-          payment_status: 'pending', // 결제 상태 추가
-          order_group_id: orderGroupId,
-        },
-      ])
-      .select('id')
-      .single();
-
-    if (orderError) throw orderError;
-    const orderId = orderData.id;
-
-    // 4. 주문 항목 추가
-    const orderItemsData = items.map((item: any) => ({
-      order_id: orderId,
-      menu_id: item.menuId,
-      quantity: item.quantity,
-      price: item.price,
-    }));
-
-    const { data: insertedOrderItems, error: orderItemsError } = await supabase
-      .from('order_items')
-      .insert(orderItemsData)
-      .select('id, menu_id');
-
-    if (orderItemsError) throw orderItemsError;
-
-    // 5. 주문 항목 옵션 추가
-    const orderItemOptionsData = [];
-
-    for (const orderItem of insertedOrderItems) {
-      const item = items.find((i: any) => i.menuId === orderItem.menu_id);
-      if (item && item.options) {
-        for (const option of item.options) {
-          orderItemOptionsData.push({
-            order_item_id: orderItem.id,
-            option_id: option.optionId,
-            option_price: option.price,
-          });
-        }
-      }
-    }
-
-    if (orderItemOptionsData.length > 0) {
-      const { error: orderItemOptionsError } = await supabase
-        .from('order_item_options')
-        .insert(orderItemOptionsData);
-
-      if (orderItemOptionsError) throw orderItemOptionsError;
-    }
-
-    // 6. 주문 결제 요청(`payments`) 자동 생성 (pending 상태)
-    const { error: paymentError } = await supabase.from('payments').insert([
-      {
-        order_id: orderId,
-        amount: totalPrice,
-        status: 'pending', // 기본 결제 상태
-      },
-    ]);
-
-    if (paymentError) throw paymentError;
-
-    return NextResponse.json({ orderId, orderGroupId }, { status: 201 });
+    return NextResponse.json(data, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Unknown error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
