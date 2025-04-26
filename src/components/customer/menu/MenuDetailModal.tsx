@@ -62,6 +62,22 @@ export default function MenuDetailModal({
     Record<string, string[]>
   >({});
 
+  const selectedOptionsTotalPrice = menu
+    ? Object.entries(selectedOptions)
+        .flatMap(([groupId, optionIds]) =>
+          menu.option_groups
+            .filter((group) => group.id === groupId)
+            .flatMap((group) =>
+              group.options.filter((option) => optionIds.includes(option.id))
+            )
+        )
+        .reduce((sum, option) => sum + option.price, 0)
+    : 0;
+
+  const totalPrice = menu
+    ? (menu.price + selectedOptionsTotalPrice) * quantity
+    : 0;
+
   const handleOptionChange = (
     groupId: string,
     optionId: string,
@@ -240,7 +256,7 @@ export default function MenuDetailModal({
                     </Button>
                   </div>
                   <span className='text-2xl font-bold text-toss-blue'>
-                    {formatPriceLabel(menu.price * quantity)}
+                    {formatPriceLabel(totalPrice)}
                   </span>
                 </div>
                 <Button
